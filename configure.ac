@@ -345,7 +345,8 @@ if test "x$platform_os_osx" = "xyes"
 then
 
    PKG_CHECK_MODULES(IGE, gtk-mac-integration-gtk3 >= 2.0,
-        [AC_DEFINE(HAVE_GTK_MAC_INTEGRATION, 1, [Define if we have gtk-mac-integration 2.0+])])
+        [AC_DEFINE(HAVE_GTK_MAC_INTEGRATION, 1, [Define if we have gtk-mac-integration 2.0+])],
+        [PKG_CHECK_MODULES(IGE, ige-mac-integration >= 0.6, AC_DEFINE(HAVE_IGE_MAC_INTEGRATION, 1, [Define if we have ige-mac-integration 0.6+]))])
 
    AC_CHECK_LIB(resolv, res_query)
 
@@ -651,7 +652,7 @@ INDICATOR_REQUIRED_VERSION=0.3.19
 DBUSMENUGLIB_REQUIRED_VERSION=0.1.1
 DBUSMENUGTK_REQUIRED_VERSION=0.3.95
 
-if test "x$enable_indicator" != "xno" -a "x$config_gtk_version" = "x3"
+if test "x$enable_indicator" != "xno" -a "x$config_gtk_version" = "x3" -a test "x$platform_os_osx" = "xno"
 then
    if test "x$found_introspection" != "xyes"
    then
@@ -716,7 +717,7 @@ dnl
 config_xfce=no
 config_xfce_gtk_version=none
 
-if test "x$enable_xfce" != "xno"
+if test "x$enable_xfce" != "xno" -a test "x$platform_os_osx" = "xno"
 then
    PKG_CHECK_MODULES([LIBXFCE4PANEL],
                     [libxfce4panel-2.0 >= 4.12],
