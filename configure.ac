@@ -420,7 +420,7 @@ fi
 with_cxx11=no
 # Enable C++11 std if gtkmm >= 3.18.0
 PKG_CHECK_MODULES(GTKMM, gtkmm-3.0 >= 3.18.0,
-    [ AX_CXX_COMPILE_STDCXX_11([noext])
+    [ AX_CXX_COMPILE_STDCXX_14([noext])
     with_cxx11=yes
     ],
     []
