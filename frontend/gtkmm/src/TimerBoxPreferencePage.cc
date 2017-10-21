@@ -23,6 +23,10 @@
 
 #include "preinclude.h"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm.h>
 
 #include "nls.h"

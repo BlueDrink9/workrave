@@ -20,6 +20,9 @@
 #ifndef EVENTIMAGE_HH
 #define EVENTIMAGE_HH
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <gtkmm/image.h>
 
 class EventImage : public Gtk::Image

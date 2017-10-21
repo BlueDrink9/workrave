@@ -23,6 +23,10 @@
 
 #include "preinclude.h"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include "debug.hh"
 #include <fstream>
 #include <stdio.h>

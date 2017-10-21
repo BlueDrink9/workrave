@@ -21,6 +21,10 @@
 #include "config.h"
 #endif
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtk/gtk.h>
 #include <gtkmm.h>
 

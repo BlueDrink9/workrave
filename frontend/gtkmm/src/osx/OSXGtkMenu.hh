@@ -31,8 +31,8 @@
 #endif
 
 #ifdef HAVE_GTK_MAC_INTEGRATION
-#include "gtk-mac-dock.h"
-#define IgeMacDock GtkMacDock
+#include "gtkosxapplication.h"
+#define IgeMacDock GtkosxApplication
 #endif
 
 
@@ -50,6 +50,7 @@ public:
 private:
   static void dock_clicked(IgeMacDock *dock, void *data);
   static void dock_quit(IgeMacDock *dock, void *data);
+  GtkosxApplication *theApp;
 };
 
 #endif // OSXGTKMENU_HH

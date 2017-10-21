@@ -30,6 +30,10 @@
 #endif
 #include <assert.h>
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/alignment.h>

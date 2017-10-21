@@ -17,6 +17,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <gtkmm.h>
 
 class Frame : public Gtk::Bin

@@ -53,15 +53,8 @@ using namespace std;
 
 #if HAVE_GTK_MAC_INTEGRATION
 #include "gtk-mac-menu.h"
-#include "gtk-mac-dock.h"
+#include "gtkosxapplication.h"
 #include "gtk-mac-bundle.h"
-#define IgeMacMenuGroup GtkMacMenuGroup
-#define IgeMacDock GtkMacDock
-#define ige_mac_menu_set_menu_bar gtk_mac_menu_set_menu_bar
-#define ige_mac_menu_set_quit_menu_item gtk_mac_menu_set_quit_menu_item
-#define ige_mac_menu_add_app_menu_group gtk_mac_menu_add_app_menu_group
-#define ige_mac_menu_add_app_menu_item gtk_mac_menu_add_app_menu_item
-#define ige_mac_dock_new gtk_mac_dock_new
 #endif
 
 
@@ -70,6 +63,8 @@ OSXGtkMenu::OSXGtkMenu(bool show_open)
   : MainGtkMenu(show_open)
 {
   this->theApp = gtkosx_application_get();
+  // This was the line used before merging os-x-fixes
+  // this->theApp = (GtkosxApplication *)g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
   if (this->theApp == NULL) {
     g_warning("Null App!");
   }
@@ -93,10 +88,10 @@ OSXGtkMenu::popup(const guint button, const guint activate_time)
 void
 OSXGtkMenu::dock_clicked(IgeMacDock *dock, void *data)
 {
-  (void) dock;
-  // current, segment fault
-  // Menus *menus = (Menus *) data;
-  // menus->on_menu_open_main_window();
+  #ifdef HAVE_GTK_MAC_INTEGRATION
+  Menus *menus = (Menus *) data;
+  menus->on_menu_open_main_window();
+  #endif
 }
 
 
@@ -152,9 +147,6 @@ OSXGtkMenu::create_ui()
       std::cerr << "building menus and toolbars failed: " <<  ex.what();
     }
 
-  IgeMacMenuGroup *group;
-  IgeMacDock      *dock;
-
   Gtk::MenuBar *menu = dynamic_cast<Gtk::MenuBar*>(ui_manager->get_widget("/Menu"));
   GtkMenuBar *menu_shell = menu->gobj();
   MainWindow *main_window = gui->get_main_window();
@@ -168,12 +160,22 @@ OSXGtkMenu::create_ui()
   menu = dynamic_cast<Gtk::MenuBar*>(ui_manager->get_widget("/Menu"));
   menu_shell = menu->gobj();
   gtkosx_application_set_dock_menu(this->theApp, GTK_MENU_SHELL(menu_shell));
+  ige_mac_menu_set_menu_bar(GTK_MENU_SHELL(menu->gobj()));
+  #ifdef HAVE_GTK_MAC_INTEGRATION
+  gtkosx_application_set_menu_bar(this->theApp, GTK_MENU_SHELL(menu->gobj()));
+  #else
+  ige_mac_menu_set_menu_bar(GTK_MENU_SHELL(menu->gobj()));
+  #endif
 
-  #if 0
+  // #if 0
   Gtk::MenuItem *item = dynamic_cast<Gtk::MenuItem*>(ui_manager->get_widget("/Apple/Quit"));
+  #ifdef HAVE_IGE_MAC_INTEGRATION
   ige_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(item->gobj()));
 
   item = dynamic_cast<Gtk::MenuItem*>(ui_manager->get_widget("/Apple/About"));
+
+  IgeMacMenuGroup *group;
+  IgeMacDock      *dock;
 
   group = ige_mac_menu_add_app_menu_group();
   ige_mac_menu_add_app_menu_item(group,
@@ -197,5 +199,5 @@ OSXGtkMenu::create_ui()
                    "quit-activate",
                    G_CALLBACK(dock_quit),
                    this);
-
+  #endif
 }

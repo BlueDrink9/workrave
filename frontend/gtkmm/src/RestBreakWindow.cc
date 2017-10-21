@@ -34,6 +34,10 @@ const int TIMEOUT = 1000;
 #include "W32ForceFocus.hh"
 #endif
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/button.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>

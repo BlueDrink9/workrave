@@ -23,6 +23,9 @@
 #include "preinclude.h"
 
 #include <sigc++/trackable.h>
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <glibmm.h>
 
 #if defined(PLATFORM_OS_WIN32)

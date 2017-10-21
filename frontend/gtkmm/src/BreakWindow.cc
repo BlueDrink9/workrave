@@ -45,7 +45,9 @@
 #undef max
 #endif
 
-#include <gtkmm.h>
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <math.h>
 
 #include "BreakWindow.hh"

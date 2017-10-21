@@ -28,6 +28,10 @@
 #include "nls.h"
 #include "debug.hh"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <sstream>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

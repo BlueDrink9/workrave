@@ -41,6 +41,7 @@
 
 #ifdef PLATFORM_OS_OSX
 #include "OSXAppletWindow.hh"
+#include "OSXHelpers.hh"
 #endif
 
 #include "GUI.hh"

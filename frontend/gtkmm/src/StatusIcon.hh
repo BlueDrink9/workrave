@@ -30,6 +30,11 @@
 //#endif
 #include <gdk/gdkwin32.h>
 #endif
+
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/statusicon.h>
 
 #include "ICore.hh"

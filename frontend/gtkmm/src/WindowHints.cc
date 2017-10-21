@@ -29,6 +29,10 @@
 #undef max
 #endif
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/window.h>
 
 #ifdef PLATFORM_OS_WIN32

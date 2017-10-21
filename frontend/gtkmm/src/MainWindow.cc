@@ -193,7 +193,9 @@ MainWindow::close_window()
 #ifdef PLATFORM_OS_WIN32
   win32_show(false);
 #elif defined(PLATFORM_OS_OSX)
+#ifdef HAVE_IGE_MAC_INTEGRATION
   hide_all();
+#endif // HAVE_IGE_MAC_INTEGRATION
 #else
   if (can_close)
     {

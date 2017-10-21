@@ -26,6 +26,9 @@
 #include "nls.h"
 #include "debug.hh"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <gtkmm.h>
 #include "TimeEntry.hh"
 
