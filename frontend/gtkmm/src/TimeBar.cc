@@ -25,6 +25,10 @@
 
 #include "debug.hh"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>

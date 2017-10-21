@@ -22,8 +22,16 @@
 
 #include "preinclude.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef PLATFORM_OS_WIN32_NATIVE
 #undef max
+#endif
+
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
 #endif
 
 #include <gdkmm/rectangle.h>

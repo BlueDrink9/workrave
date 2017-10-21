@@ -34,6 +34,10 @@
 # endif
 #endif
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

@@ -31,6 +31,10 @@
 #endif
 #include <assert.h>
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/notebook.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/menu.h>

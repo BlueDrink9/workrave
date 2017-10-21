@@ -27,6 +27,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/checkbutton.h>
 

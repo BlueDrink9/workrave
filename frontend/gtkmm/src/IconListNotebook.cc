@@ -25,6 +25,10 @@
 #include "debug.hh"
 #include "nls.h"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm.h>
 #include <gtk/gtk.h>
 

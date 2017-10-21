@@ -30,6 +30,10 @@
 #endif
 #include <assert.h>
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm/textview.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/adjustment.h>

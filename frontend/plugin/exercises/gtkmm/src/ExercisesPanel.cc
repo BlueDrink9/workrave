@@ -25,6 +25,10 @@
 
 #include <algorithm>
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <string.h>
 #include <gtkmm.h>
 

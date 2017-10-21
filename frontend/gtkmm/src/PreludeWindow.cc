@@ -21,6 +21,10 @@
 
 #include "preinclude.h"
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
+
 #include <gtkmm.h>
 #ifdef HAVE_GTK3
 #include <gdkmm/devicemanager.h>

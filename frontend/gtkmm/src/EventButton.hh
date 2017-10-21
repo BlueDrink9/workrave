@@ -20,6 +20,9 @@
 #ifndef EVENTBUTTON_HH
 #define EVENTBUTTON_HH
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <gtkmm/button.h>
 
 class EventButton : public Gtk::Button

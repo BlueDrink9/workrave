@@ -20,6 +20,9 @@
 #ifndef EVENTLABEL_HH
 #define EVENTLABEL_HH
 
+#ifdef PLATFORM_OS_OSX
+#include "OSXHelpers.hh"
+#endif
 #include <gtkmm/label.h>
 
 class EventLabel : public Gtk::Label
