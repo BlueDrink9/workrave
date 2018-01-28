@@ -27,17 +27,12 @@
 
 #include "OSXAppletWindow.hh"
 #include "TimerBoxControl.hh"
-<<<<<<< HEAD
 #include "GUI.hh"
 #include "Menus.hh"
 #include "MenuEnums.hh"
-||||||| parent of fe594785... Link Objc code back to the GUI commands in C++
-=======
-#include "GUI.hh"
-#include "Menus.hh"
->>>>>>> fe594785... Link Objc code back to the GUI commands in C++
 
 #import "OSXStatusBarView.h"
+#import "OSXMenuActions.h"
 
 NSMenuItem* AddMenuItem(NSMenu* menu, OSXMenuActions* target, const char* name, long command)
 {
@@ -68,25 +63,20 @@ OSXAppletWindow::OSXAppletWindow()
   NSMenu *menu = [[NSMenu alloc] init];
   view = [[OSXStatusBarView alloc] initWithMenu:menu];
 
-  int i;
   while ([menu numberOfItems] > 0) {
     [menu removeItemAtIndex:0];
   }
-
-  NSMenuItem *item;
-
-<<<<<<< HEAD
-  item = [[[NSMenuItem alloc] initWithTitle:@"Hello"
-                              action:nil keyEquivalent:@""] autorelease];
-  // [item setTarget:self];
-  [item setEnabled:YES];
-  [menu addItem:item];
-  [menu addItem:[NSMenuItem separatorItem]];
-||||||| parent of fe594785... Link Objc code back to the GUI commands in C++
   OSXMenuActions* target = [OSXMenuActions alloc];
-=======
-  OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
->>>>>>> fe594785... Link Objc code back to the GUI commands in C++
+
+  for (unsigned int i=0;i<sizeof(actions)/sizeof(const char *); i++) {
+    NSMenuItem *item;
+    item = [[NSMenuItem alloc] init];
+    [item setTitle:[[NSString alloc] initWithUTF8String:actions[i]]];
+    [item setTarget:target];
+    [item setAction:@selector(runAction:)];
+    [item setEnabled:YES];
+    [menu addItem:item];
+  }
 
   OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
 

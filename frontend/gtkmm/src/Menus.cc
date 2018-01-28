@@ -127,7 +127,7 @@ Menus::init(AppletControl *applet_control)
   IAppletWindow *applet_window = NULL;
 
 #if defined(PLATFORM_OS_OSX)
-  menus[MENU_MAINWINDOW] = new OSXGtkMenu(true);
+  menus[MENU_MAINWINDOW] = new OSXGtkMenu(true, gui);
 #else
   menus[MENU_MAINWINDOW] = new MainGtkMenu(false);
 #endif

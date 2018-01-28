@@ -7,7 +7,7 @@
 {
   statusItem = [[[NSStatusBar systemStatusBar]
                   statusItemWithLength:NSVariableStatusItemLength] retain];
-  self = [super initWithFrame:NSMakeRect(0, 0, 100, 22)];
+  self = [super initWithFrame:NSMakeRect(0, 0, 22, 22)];
 
   for (int i = 0; i < 3; i++)
     {
@@ -32,7 +32,7 @@
   primaryMaxValue:(int)primaryMaxValue
    secondaryColor:(ColorId)secondaryColor
    secondaryValue:(int)secondaryValue
-secondaryMaxValue:(int)secondaryMaxValue;
+secondaryMaxValue:(int)secondaryMaxValue
 {
   OSXTimeBar *timebar = timebars[id];
 
