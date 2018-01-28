@@ -64,6 +64,8 @@ For OS X, the following steps will install sufficient packages
 2. `brew install gettext intltool gobject-introspection autoconf-archive gtk+ gtk-mac-integration gtkmm3`
 3. `brew link --force gettext libffi`
 
+Both developers and regular users should install `gnome-icon-theme` and `hicolor-icon-theme`
+
 ## Troubleshooting
 
 ### Show timers applet in Cinnamon
@@ -79,3 +81,7 @@ Have a look at the [contrib](./contrib) directory to get a little insight into t
   Explore by having a look at the [example python script](./backend/src/dbus-example.py) or viewing in `qdbusviewer` (part of the `qttools5-dev-tools` package in Ubuntu).
 
 In both of these, workrave is found under the `org.workrave` key.
+
+### OS X
+
+OS X support is limited, but it will work under the right conditions. See [#89](https://github.com/rcaelers/workrave/issues/89) for information and progress.
