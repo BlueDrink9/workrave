@@ -11,7 +11,8 @@
 
 - (void) runAction: (id)sender
 {
-  actionsRunner->run_action(1);
-  printf ("Hello!\n");
+  NSLog(@"Contents of sender: %@", sender);
+  NSLog(@"Command tag is: %ld\n", [sender tag]);
+  actionsRunner->run_action([sender tag]);
 }
 @end

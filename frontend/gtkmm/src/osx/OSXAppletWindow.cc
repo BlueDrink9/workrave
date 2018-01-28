@@ -29,6 +29,7 @@
 #include "TimerBoxControl.hh"
 #include "GUI.hh"
 #include "Menus.hh"
+#include "MenuEnums.hh"
 
 #import "OSXStatusBarView.h"
 #import "OSXMenuActions.h"
@@ -55,6 +56,7 @@ OSXAppletWindow::OSXAppletWindow()
     NSMenuItem *item;
     item = [[NSMenuItem alloc] init];
     [item setTitle:[[NSString alloc] initWithUTF8String:actions[i]]];
+    [item setTag:MENU_COMMAND_ABOUT];
     [item setTarget:target];
     [item setAction:@selector(runAction:)];
     [item setEnabled:YES];
@@ -136,7 +138,7 @@ OSXAppletWindow::deactivate_applet()
 }
 
 void
-OSXAppletWindow::run_action(int command)
+OSXAppletWindow::run_action(long command)
 {
   IGUI *gui = GUI::get_instance();
   Menus *menus = gui->get_menus();

@@ -3,7 +3,7 @@
 
 class OSXActionsRunner {
   public:
-    virtual void run_action(int command) = 0;
+    virtual void run_action(long command) = 0;
 };
 
 #endif

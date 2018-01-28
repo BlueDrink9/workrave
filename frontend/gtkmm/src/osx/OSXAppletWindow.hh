@@ -49,7 +49,7 @@ public:
                     ITimeBar::ColorId secondary_color,
                     int secondary_value, int secondary_max);
 
-  virtual void run_action(int command);
+  virtual void run_action(long command);
 
 private:
   ColorId convertColorId(ITimeBar::ColorId colorId);

@@ -360,6 +360,7 @@ Menus::on_menu_about()
         }
       catch (...)
         {
+          g_warning("Could not load %s", icon.c_str());
         }
 
 
