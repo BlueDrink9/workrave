@@ -30,6 +30,25 @@
 
 #import "OSXStatusBarView.h"
 
+NSMenuItem* AddMenuItem(NSMenu* menu, OSXMenuActions* target, const char* name, long command)
+{
+  NSMenuItem *item;
+  item = [[NSMenuItem alloc] init];
+  [item setTitle:[[NSString alloc] initWithUTF8String:name]];
+  [item setTag:command];
+  [item setTarget:target];
+  [item setAction:@selector(runAction:)];
+  [item setEnabled:YES];
+  [menu addItem:item];
+  return item;
+}
+
+NSMenu* CreateSubmenu(NSMenuItem *item) {
+  NSMenu *submenu = [[NSMenu alloc] init];
+  [item setSubmenu:submenu];
+  return submenu;
+}
+
 OSXAppletWindow::OSXAppletWindow()
 {
   TRACE_ENTER("OSXAppletWindow::OSXAppletWindow");
@@ -44,6 +63,7 @@ OSXAppletWindow::OSXAppletWindow()
   while ([menu numberOfItems] > 0) {
     [menu removeItemAtIndex:0];
   }
+
   NSMenuItem *item;
 
   item = [[[NSMenuItem alloc] initWithTitle:@"Hello"
@@ -52,6 +72,26 @@ OSXAppletWindow::OSXAppletWindow()
   [item setEnabled:YES];
   [menu addItem:item];
   [menu addItem:[NSMenuItem separatorItem]];
+
+  OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
+
+  AddMenuItem(menu, target, _("Open"), MENU_COMMAND_OPEN);
+
+  NSMenu *mode = CreateSubmenu(AddMenuItem(menu, target, _("Mode"), MENU_COMMAND_MODE_SUBMENU));
+  AddMenuItem(mode, target, _("Normal"), MENU_COMMAND_MODE_NORMAL);
+  AddMenuItem(mode, target, _("Suspended"), MENU_COMMAND_MODE_SUSPENDED);
+  AddMenuItem(mode, target, _("Quiet"), MENU_COMMAND_MODE_QUIET);
+
+  NSMenu *network = CreateSubmenu(AddMenuItem(menu, target, _("Network"), MENU_COMMAND_MODE_SUBMENU));
+  AddMenuItem(network, target, _("Connect"), MENU_COMMAND_NETWORK_CONNECT);
+  AddMenuItem(network, target, _("Disconnect"), MENU_COMMAND_NETWORK_DISCONNECT);
+  AddMenuItem(network, target, _("Reconnect"), MENU_COMMAND_NETWORK_RECONNECT);
+  AddMenuItem(network, target, _("Show log"), MENU_COMMAND_NETWORK_LOG);
+
+  AddMenuItem(menu, target, _("Reading mode"), MENU_COMMAND_MODE_READING);
+  AddMenuItem(menu, target, _("Statistics"), MENU_COMMAND_STATISTICS);
+  AddMenuItem(menu, target, _("About..."), MENU_COMMAND_ABOUT);
+  AddMenuItem(menu, target, _("Quit"), MENU_COMMAND_QUIT);
 
   [menu update];
 
