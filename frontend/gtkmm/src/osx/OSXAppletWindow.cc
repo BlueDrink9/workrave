@@ -27,6 +27,9 @@
 
 #include "OSXAppletWindow.hh"
 #include "TimerBoxControl.hh"
+#include "GUI.hh"
+#include "Menus.hh"
+#include "MenuEnums.hh"
 
 #import "OSXStatusBarView.h"
 
@@ -166,4 +169,12 @@ OSXAppletWindow::activate_applet()
 void
 OSXAppletWindow::deactivate_applet()
 {
+}
+
+void
+OSXAppletWindow::run_action(long command)
+{
+  IGUI *gui = GUI::get_instance();
+  Menus *menus = gui->get_menus();
+  menus->applet_command(command);
 }

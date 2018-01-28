@@ -358,7 +358,18 @@ Menus::on_menu_about()
 {
   if (about == NULL)
     {
-      Glib::RefPtr<Gdk::Pixbuf> pixbuf = GtkUtil::create_pixbuf("workrave.png");
+      string icon = Util::complete_directory("workrave.png",
+                                             Util::SEARCH_PATH_IMAGES);
+      Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+
+      try
+        {
+          pixbuf = Gdk::Pixbuf::create_from_file(icon);
+        }
+      catch (...)
+        {
+          g_warning("Could not load %s", icon.c_str());
+        }
       about = new Gtk::AboutDialog;
 
       about->set_name("Workrave");
