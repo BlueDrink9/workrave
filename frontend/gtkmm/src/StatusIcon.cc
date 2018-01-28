@@ -85,6 +85,7 @@ StatusIcon::init()
         }
       catch(...)
         {
+          g_warning("Can't find %s so not initialising status icon", file.c_str());
           return;
         }
     }
@@ -161,6 +162,7 @@ StatusIcon::is_visible() const
 void
 StatusIcon::set_tooltip(std::string& tip)
 {
+  g_assert(status_icon);
 #if defined(HAVE_GTK3) && !defined(USE_W32STATUSICON)
   status_icon->set_tooltip_text(tip);
 #else
