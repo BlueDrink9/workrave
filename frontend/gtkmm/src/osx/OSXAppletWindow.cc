@@ -27,9 +27,15 @@
 
 #include "OSXAppletWindow.hh"
 #include "TimerBoxControl.hh"
+<<<<<<< HEAD
 #include "GUI.hh"
 #include "Menus.hh"
 #include "MenuEnums.hh"
+||||||| parent of fe594785... Link Objc code back to the GUI commands in C++
+=======
+#include "GUI.hh"
+#include "Menus.hh"
+>>>>>>> fe594785... Link Objc code back to the GUI commands in C++
 
 #import "OSXStatusBarView.h"
 
@@ -69,12 +75,18 @@ OSXAppletWindow::OSXAppletWindow()
 
   NSMenuItem *item;
 
+<<<<<<< HEAD
   item = [[[NSMenuItem alloc] initWithTitle:@"Hello"
                               action:nil keyEquivalent:@""] autorelease];
   // [item setTarget:self];
   [item setEnabled:YES];
   [menu addItem:item];
   [menu addItem:[NSMenuItem separatorItem]];
+||||||| parent of fe594785... Link Objc code back to the GUI commands in C++
+  OSXMenuActions* target = [OSXMenuActions alloc];
+=======
+  OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
+>>>>>>> fe594785... Link Objc code back to the GUI commands in C++
 
   OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
 
@@ -164,7 +176,6 @@ OSXAppletWindow::activate_applet()
 {
   return APPLET_STATE_VISIBLE;
 }
-
 
 void
 OSXAppletWindow::deactivate_applet()
