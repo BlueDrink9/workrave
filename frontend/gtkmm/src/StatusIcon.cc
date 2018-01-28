@@ -79,7 +79,17 @@ StatusIcon::init()
   assert(sizeof(mode_files)/sizeof(mode_files[0]) == OPERATION_MODE_SIZEOF);
   for (size_t i = 0; i < OPERATION_MODE_SIZEOF; i++)
     {
-       mode_icons[(OperationMode)i] = GtkUtil::create_pixbuf(mode_files[i]);
+      std::string file = Util::complete_directory(mode_files[i],
+          Util::SEARCH_PATH_IMAGES);
+      try
+        {
+          mode_icons[(OperationMode)i] = Gdk::Pixbuf::create_from_file(file);
+        }
+      catch(...)
+        {
+          g_warning("Can't find %s so not initialising status icon", file.c_str());
+          return;
+        }
     }
 
   insert_icon();
@@ -154,6 +164,7 @@ StatusIcon::is_visible() const
 void
 StatusIcon::set_tooltip(std::string& tip)
 {
+  g_assert(status_icon);
 #if defined(HAVE_GTK3) && !defined(USE_W32STATUSICON)
   status_icon->set_tooltip_text(tip);
 #else
