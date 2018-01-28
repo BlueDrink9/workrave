@@ -25,32 +25,25 @@
 #include <string>
 
 #include "MainGtkMenu.hh"
+#include "GUI.hh"
 
-#ifdef HAVE_IGE_MAC_INTEGRATION
-#include "ige-mac-dock.h"
-#endif
-
-#ifdef HAVE_GTK_MAC_INTEGRATION
 #include "gtkosxapplication.h"
-#define IgeMacDock GtkosxApplication
-#endif
-
-
 
 class OSXGtkMenu
   : public MainGtkMenu
 {
 public:
-  OSXGtkMenu(bool show_open);
+  OSXGtkMenu(bool show_open, IGUI* gui);
   virtual ~OSXGtkMenu();
 
   virtual void create_ui();
   virtual void popup(const guint button, const guint activate_time);
 
 private:
-  static void dock_clicked(IgeMacDock *dock, void *data);
-  static void dock_quit(IgeMacDock *dock, void *data);
+  static void dock_clicked(GtkosxApplication *dock, void *data);
+  static void dock_quit(GtkosxApplication *dock, void *data);
   GtkosxApplication *theApp;
+  IGUI* gui;
 };
 
 #endif // OSXGTKMENU_HH
