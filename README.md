@@ -58,3 +58,5 @@ For OS X, the following steps will install sufficient packages
 1. Install [Homebrew](https://brew.sh/)
 2. `brew install gettext intltool gobject-introspection autoconf-archive gtk+ gtk-mac-integration gtkmm3`
 3. `brew link --force gettext libffi`
+
+Both developers and regular users should install `gnome-icon-theme` and `hicolor-icon-theme`
