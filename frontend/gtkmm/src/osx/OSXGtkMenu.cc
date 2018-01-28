@@ -29,6 +29,7 @@
 #include "debug.hh"
 
 #include "OSXGtkMenu.hh"
+#include "MainWindow.hh"
 
 #include <string>
 

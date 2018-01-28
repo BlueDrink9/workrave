@@ -331,7 +331,9 @@ GUI::on_timer()
 
   applet_control->heartbeat();
   applet_control->set_tooltip(tip);
+  #ifndef PLATFORM_OS_OSX
   status_icon->set_tooltip(tip);
+  #endif
 
   heartbeat_signal();
 
@@ -792,16 +794,20 @@ GUI::init_gui()
   menus->resync();
 
   // Status Icon
+  #ifndef PLATFORM_OS_OSX
   status_icon = new StatusIcon();
   status_icon->init();
+  #endif
 
   // Events
   event_connections.push_back(main_window->signal_closed().connect(sigc::mem_fun(*this, &GUI::on_main_window_closed)));
   event_connections.push_back(main_window->signal_visibility_changed().connect(sigc::mem_fun(*this, &GUI::on_visibility_changed)));
   event_connections.push_back(applet_control->signal_visibility_changed().connect(sigc::mem_fun(*this, &GUI::on_visibility_changed)));
+  #ifndef PLATFORM_OS_OSX
   event_connections.push_back(status_icon->signal_balloon_activate().connect(sigc::mem_fun(*this, &GUI::on_status_icon_balloon_activate)));
   event_connections.push_back(status_icon->signal_activate().connect(sigc::mem_fun(*this, &GUI::on_status_icon_activate)));
   event_connections.push_back(status_icon->signal_visibility_changed().connect(sigc::mem_fun(*this, &GUI::on_visibility_changed)));
+  #endif
 
   process_visibility();
   

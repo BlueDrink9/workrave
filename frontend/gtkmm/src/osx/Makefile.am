@@ -18,6 +18,7 @@ libworkrave_frontend_gtkmm_osx_la_SOURCES = \
 			AppController.m \
 			OSXGtkMenu.cc \
 			OSXAppletWindow.cc \
+			OSXMenuActions.m \
 			OSXStatusBarView.m \
 			OSXTimeBar.m
 

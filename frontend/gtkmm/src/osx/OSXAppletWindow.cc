@@ -29,6 +29,7 @@
 #include "TimerBoxControl.hh"
 
 #import "OSXStatusBarView.h"
+#import "OSXMenuActions.h"
 
 OSXAppletWindow::OSXAppletWindow()
 {
@@ -40,18 +41,23 @@ OSXAppletWindow::OSXAppletWindow()
   NSMenu *menu = [[NSMenu alloc] init];
   view = [[OSXStatusBarView alloc] initWithMenu:menu];
 
-  int i;
   while ([menu numberOfItems] > 0) {
     [menu removeItemAtIndex:0];
   }
-  NSMenuItem *item;
 
-  item = [[[NSMenuItem alloc] initWithTitle:@"Hello"
-                              action:nil keyEquivalent:@""] autorelease];
-  // [item setTarget:self];
-  [item setEnabled:YES];
-  [menu addItem:item];
-  [menu addItem:[NSMenuItem separatorItem]];
+  const char * actions[] = {"Main", "Mode", "Network", "Reading"};
+
+  OSXMenuActions* target = [OSXMenuActions alloc];
+
+  for (unsigned int i=0;i<sizeof(actions)/sizeof(const char *); i++) {
+    NSMenuItem *item;
+    item = [[NSMenuItem alloc] init];
+    [item setTitle:[[NSString alloc] initWithUTF8String:actions[i]]];
+    [item setTarget:target];
+    [item setAction:@selector(runAction:)];
+    [item setEnabled:YES];
+    [menu addItem:item];
+  }
 
   [menu update];
 

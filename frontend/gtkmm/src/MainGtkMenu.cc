@@ -260,7 +260,7 @@ MainGtkMenu::create_ui()
   popup_menu = dynamic_cast<Gtk::Menu*>(ui_manager->get_widget("/Menu"));
 
 #ifdef PLATFORM_OS_OSX
-  osx_popup_hack_connect(popup_menu);
+  //osx_popup_hack_connect(popup_menu);
 #endif
 }
 
