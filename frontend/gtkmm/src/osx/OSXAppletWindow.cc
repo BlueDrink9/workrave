@@ -27,6 +27,8 @@
 
 #include "OSXAppletWindow.hh"
 #include "TimerBoxControl.hh"
+#include "GUI.hh"
+#include "Menus.hh"
 
 #import "OSXStatusBarView.h"
 #import "OSXMenuActions.h"
@@ -47,7 +49,7 @@ OSXAppletWindow::OSXAppletWindow()
 
   const char * actions[] = {"Main", "Mode", "Network", "Reading"};
 
-  OSXMenuActions* target = [OSXMenuActions alloc];
+  OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
 
   for (unsigned int i=0;i<sizeof(actions)/sizeof(const char *); i++) {
     NSMenuItem *item;
@@ -128,8 +130,15 @@ OSXAppletWindow::activate_applet()
   return APPLET_STATE_VISIBLE;
 }
 
-
 void
 OSXAppletWindow::deactivate_applet()
 {
+}
+
+void
+OSXAppletWindow::run_action(int command)
+{
+  IGUI *gui = GUI::get_instance();
+  Menus *menus = gui->get_menus();
+  menus->applet_command(command);
 }

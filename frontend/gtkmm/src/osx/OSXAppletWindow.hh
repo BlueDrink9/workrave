@@ -26,12 +26,13 @@
 #include "TimerBoxViewBase.hh"
 #include "ITimeBar.hh"
 #include "AppletWindow.hh"
+#include "OSXActionsRunner.hh"
 
 #import "ColorId.h"
 
 @class OSXStatusBarView;
 
-class OSXAppletWindow : public AppletWindow, public TimerBoxViewBase
+class OSXAppletWindow : public AppletWindow, public TimerBoxViewBase, public OSXActionsRunner
 {
 public:
   OSXAppletWindow();
@@ -40,13 +41,15 @@ public:
   virtual AppletState activate_applet();
   virtual void deactivate_applet();
 
-  void set_slot(BreakId  id, int slot);
+  void set_slot(BreakId id, int slot);
   void set_time_bar(BreakId id,
                     std::string text,
                     ITimeBar::ColorId primary_color,
                     int primary_value, int primary_max,
                     ITimeBar::ColorId secondary_color,
                     int secondary_value, int secondary_max);
+
+  virtual void run_action(int command);
 
 private:
   ColorId convertColorId(ITimeBar::ColorId colorId);
