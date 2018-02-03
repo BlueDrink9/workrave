@@ -40,6 +40,7 @@ libworkrave_frontend_gtkmm_osx_la_CFLAGS = \
 
 libworkrave_frontend_gtkmm_osx_la_CXXFLAGS = \
 			@X_CFLAGS@ -xobjective-c++ \
+			-DWORKRAVE_PKGDATADIR="\"${pkgdatadir}\"" \
 			-W  -I$(top_srcdir)/frontend/common/include \
 			-I$(top_srcdir)/backend/include \
 			-I $(top_srcdir)/frontend/gtkmm/src @GTK_CFLAGS@ @IGE_CFLAGS@ \
