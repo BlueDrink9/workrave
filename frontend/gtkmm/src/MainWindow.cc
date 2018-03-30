@@ -276,6 +276,7 @@ MainWindow::init()
         }
       catch (...)
         {
+          g_info("Could not load %s", file.c_str());
         }
     }
 
