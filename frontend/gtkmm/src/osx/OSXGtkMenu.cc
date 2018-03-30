@@ -69,6 +69,11 @@ using namespace std;
 OSXGtkMenu::OSXGtkMenu(bool show_open)
   : MainGtkMenu(show_open)
 {
+  this->theApp = gtkosx_application_get();
+  if (this->theApp == NULL) {
+    g_warning("Null App!");
+  }
+  this->gui = gui;
 }
 
 
