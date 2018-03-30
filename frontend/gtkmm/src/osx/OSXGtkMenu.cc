@@ -54,7 +54,10 @@ using namespace std;
 OSXGtkMenu::OSXGtkMenu(bool show_open, IGUI* gui)
   : MainGtkMenu(show_open)
 {
-  this->theApp = (GtkosxApplication *)g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
+  this->theApp = gtkosx_application_get();
+  if (this->theApp == NULL) {
+    g_warning("Null App!");
+  }
   this->gui = gui;
 }
 
