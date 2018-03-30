@@ -232,19 +232,6 @@ GUI::main()
   init_gui();
   init_startup_warnings();
 
-#ifdef HAVE_GTK_MAC_INTEGRATION
-  GtkosxApplication* theApp = gtkosx_application_get();//(GtkosxApplication *)g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
-  GError *error = NULL;
-  // FIXME: Correct path. Should probably be WORKRAVE_PKGDATADIR "/images/workrave.png" but that doesn't work in debug setup
-  GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file("frontend/gtkmm/src/share/workrave/images/workrave.png", &error);
-  if (error != NULL) {
-    g_warning("Error: %s", error->message);
-    g_error_free(error);
-  }
-  gtkosx_application_set_dock_icon_pixbuf(theApp, pixbuf);
-  gtkosx_application_ready(theApp);
-#endif
-
   on_timer();
 
   TRACE_MSG("Initialized. Entering event loop.");
@@ -832,6 +819,19 @@ GUI::init_gui()
 
 #if defined(PLATFORM_OS_WIN32)
   win32_init_filter();
+#endif
+
+#ifdef HAVE_GTK_MAC_INTEGRATION
+  GtkosxApplication* theApp = gtkosx_application_get();//(GtkosxApplication *)g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
+  GError *error = NULL;
+  // FIXME: Correct path. Should probably be WORKRAVE_PKGDATADIR "/images/workrave.png" but that doesn't work in debug setup
+  GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file("frontend/gtkmm/src/share/workrave/images/workrave.png", &error);
+  if (error != NULL) {
+    g_warning("Error: %s", error->message);
+    g_error_free(error);
+  }
+  gtkosx_application_set_dock_icon_pixbuf(theApp, pixbuf);
+  gtkosx_application_ready(theApp);
 #endif
 
   // Periodic timer.
