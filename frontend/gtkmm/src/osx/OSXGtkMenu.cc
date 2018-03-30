@@ -156,10 +156,21 @@ OSXGtkMenu::create_ui()
   IgeMacDock      *dock;
 
   Gtk::MenuBar *menu = dynamic_cast<Gtk::MenuBar*>(ui_manager->get_widget("/Menu"));
+  GtkMenuBar *menu_shell = menu->gobj();
+  MainWindow *main_window = gui->get_main_window();
+  gtk_widget_set_parent(GTK_WIDGET(menu_shell), GTK_WIDGET(main_window->gobj()));
+  gtkosx_application_set_menu_bar(this->theApp, GTK_MENU_SHELL(menu_shell));
+
+  create_actions(); // to re-create action_group
+  ui_manager = Gtk::UIManager::create();
+  ui_manager->insert_action_group(action_group);
+  ui_manager->add_ui_from_string(ui_info);
+  menu = dynamic_cast<Gtk::MenuBar*>(ui_manager->get_widget("/Menu"));
+  menu_shell = menu->gobj();
+  gtkosx_application_set_dock_menu(this->theApp, GTK_MENU_SHELL(menu_shell));
+
+  #if 0
   Gtk::MenuItem *item = dynamic_cast<Gtk::MenuItem*>(ui_manager->get_widget("/Apple/Quit"));
-
-  ige_mac_menu_set_menu_bar(GTK_MENU_SHELL(menu->gobj()));
-
   ige_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(item->gobj()));
 
   item = dynamic_cast<Gtk::MenuItem*>(ui_manager->get_widget("/Apple/About"));
