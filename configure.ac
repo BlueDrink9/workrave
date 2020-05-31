@@ -429,6 +429,7 @@ PKG_CHECK_MODULES(GTKMM, gtkmm-3.0 >= 3.18.0,
     ],
     []
 )
+
 dnl
 dnl Monitors
 dnl

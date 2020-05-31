@@ -71,3 +71,9 @@ Both developers and regular users should install `gnome-icon-theme` and `hicolor
 ### Show timers applet in Cinnamon
 
 To make timers visible you need to explicitly add Workrave applet to a panel. In the other case only workrave icon is shown.
+
+## Troubleshooting
+
+### Show timers applet in Cinnamon
+
+To make timers visible you need to explicitly add Workrave applet to a panel. In the other case only workrave icon is shown.
