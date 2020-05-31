@@ -66,11 +66,12 @@
 #endif
 
 #ifdef HAVE_DBUS
+#include "dbus/DBusFactory.hh"
 #if defined(PLATFORM_OS_WIN32_NATIVE)
 #undef interface
 #endif
-#include "DBus.hh"
-#include "DBusException.hh"
+#include "dbus/IDBus.hh"
+#include "dbus/DBusException.hh"
 #include "DBusWorkrave.hh"
 #ifdef HAVE_TESTS
 #include "Test.hh"
@@ -165,7 +166,7 @@ Core::~Core()
 
 //! Initializes the core.
 void
-Core::init(int argc, char **argv, IApp *app, const string &display_name)
+Core::init(int argc, char **argv, IApp *app, const char *display_name)
 {
   application = app;
   this->argc = argc;
@@ -248,22 +249,22 @@ Core::init_bus()
 #ifdef HAVE_DBUS
   try
     {
-      dbus = new DBus();
+      dbus = workrave::dbus::DBusFactory::create();
       dbus->init();
 
-      extern void init_DBusWorkrave(DBus *dbus);
+      extern void init_DBusWorkrave(workrave::dbus::IDBus::Ptr dbus);
       init_DBusWorkrave(dbus);
 
       dbus->connect(DBUS_PATH_WORKRAVE, "org.workrave.CoreInterface", this);
       dbus->connect(DBUS_PATH_WORKRAVE, "org.workrave.ConfigInterface", configurator);
       dbus->register_object_path(DBUS_PATH_WORKRAVE);
-      
+
 #ifdef HAVE_TESTS
       dbus->connect("/org/workrave/Workrave/Debug", "org.workrave.DebugInterface", Test::get_instance());
       dbus->register_object_path("/org/workrave/Workrave/Debug");
 #endif
     }
-  catch (DBusException &)
+  catch (workrave::dbus::DBusException &)
     {
     }
 #endif
@@ -272,7 +273,7 @@ Core::init_bus()
 
 //! Initializes the activity monitor.
 void
-Core::init_monitor(const string &display_name)
+Core::init_monitor(const char *display_name)
 {
 #ifdef HAVE_DISTRIBUTION
 #ifndef NDEBUG
@@ -1302,6 +1303,21 @@ Core::get_timer_elapsed(BreakId id, int *value)
 
 
 void
+Core::get_timer_remaining(BreakId id, int *value)
+{
+  Timer *timer = get_timer(id);
+
+  *value = -1;
+
+  if (timer->is_limit_enabled())
+    {
+      int remaining = timer->get_limit() - timer->get_elapsed_time();
+      *value = remaining >= 0 ? remaining : 0;
+    }
+}
+
+
+void
 Core::get_timer_overdue(BreakId id, int *value)
 {
   Timer *timer = get_timer(id);
@@ -1579,7 +1595,7 @@ Core::start_break(BreakId break_id, BreakId resume_this_break)
     {
       if (breaks[bi].get_break_control()->get_break_state() == BreakControl::BREAK_ACTIVE)
         {
-          breaks[bi].get_break_control()->stop_break(false);
+          breaks[bi].get_break_control()->stop_break();
         }
     }
 
@@ -1627,7 +1643,7 @@ Core::stop_all_breaks()
     {
       BreakControl *bc = breaks[i].get_break_control();
       assert(bc != NULL);
-      bc->stop_break(false);
+      bc->stop_break();
     }
 }
 

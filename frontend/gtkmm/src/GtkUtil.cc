@@ -346,29 +346,22 @@ GtkUtil::center_window(Gtk::Window &window, HeadInfo &head)
 {
   TRACE_ENTER("GtkUtil::center_window");
 
-  if (head.valid)
-    {
-      Gtk::Requisition size;
+  Gtk::Requisition size;
 #ifdef HAVE_GTK3
-      Gtk::Requisition minsize;
-      window.get_preferred_size(minsize, size);
+  Gtk::Requisition minsize;
+  window.get_preferred_size(minsize, size);
 #else
-      window.size_request(size);
+  window.size_request(size);
 #endif
 
-      int x = head.geometry.get_x() + (head.geometry.get_width() - size.width) / 2;
-      int y = head.geometry.get_y() + (head.geometry.get_height() - size.height) / 2;
+  int x = head.geometry.get_x() + (head.geometry.get_width() - size.width) / 2;
+  int y = head.geometry.get_y() + (head.geometry.get_height() - size.height) / 2;
 
-      TRACE_MSG(head.geometry.get_x() << " "  << head.geometry.get_width() << " " << size.width);
-      TRACE_MSG(head.geometry.get_y() << " "  << head.geometry.get_height() << " " << size.height);
+  TRACE_MSG(head.geometry.get_x() << " "  << head.geometry.get_width() << " " << size.width);
+  TRACE_MSG(head.geometry.get_y() << " "  << head.geometry.get_height() << " " << size.height);
 
-      window.set_position(Gtk::WIN_POS_NONE);
-      window.move(x, y);
-    }
-  else
-    {
-      window.set_position(Gtk::WIN_POS_CENTER_ALWAYS);
-    }
+  window.set_position(Gtk::WIN_POS_NONE);
+  window.move(x, y);
   TRACE_EXIT();
 }
 
@@ -431,3 +424,22 @@ GtkUtil::running_on_wayland()
   return false;
 #endif
 }
+
+
+void
+GtkUtil::set_theme_fg_color(Gtk::Widget *widget)
+{
+#if GTK_CHECK_VERSION(3,0,0)
+  const char style[] =
+  "* {\n"
+  "color: @theme_fg_color;\n"
+  "}";
+
+  Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
+  Glib::RefPtr<Gtk::StyleContext> style_context = widget->get_style_context();
+
+  css_provider->load_from_data(style);
+  style_context->add_provider(css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+#endif
+}
+

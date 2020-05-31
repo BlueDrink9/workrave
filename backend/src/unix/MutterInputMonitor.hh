@@ -21,6 +21,7 @@
 #include "InputMonitor.hh"
 
 #include <gio/gio.h>
+#include <atomic>
 
 #include "Runnable.hh"
 #include "Thread.hh"
@@ -42,27 +43,39 @@ public:
   virtual void terminate();
 
 private:
-  static void on_signal(GDBusProxy *proxy, gchar *sender_name, gchar *signal_name, GVariant *parameters, gpointer user_data);
+  static void on_idle_monitor_signal(GDBusProxy *proxy, gchar *sender_name, gchar *signal_name, GVariant *parameters, gpointer user_data);
+  static void on_session_manager_property_changed(GDBusProxy *session, GVariant *changed, char **invalidated, gpointer user_data);
+
+  static void on_register_active_watch_reply(GObject *source_object, GAsyncResult *res, gpointer user_data);
+  static void on_unregister_active_watch_reply(GObject *source_object, GAsyncResult *res, gpointer user_data);
 
   //! The monitor's execution thread.
   virtual void run();
 
-  void register_active_watch();
-  void unregister_active_watch();
-  void register_idle_watch();
-  void unregister_idle_watch();
+  bool register_active_watch();
+  bool unregister_active_watch();
+  void register_active_watch_async();
+  void unregister_active_watch_async();
+  bool register_idle_watch();
+  bool unregister_idle_watch();
+
+  bool init_idle_monitor();
+  void init_inhibitors();
 
 private:
-  GDBusProxy *proxy = NULL;
-  bool active = false;
+  static const int GSM_INHIBITOR_FLAG_IDLE = 8;
+
+  GDBusProxy *idle_proxy = NULL;
+  GDBusProxy *session_proxy = NULL;
+  std::atomic<bool> active { false };
+  std::atomic<bool> inhibited { false };
   guint watch_active = 0;
   guint watch_idle = 0;
 
   bool abort = false;
   Thread *monitor_thread = NULL;
-  // TOOO: replace deprecated functions
-  GMutex *mutex = NULL;
-  GCond *cond = NULL;
+  GMutex mutex;
+  GCond cond;
 };
 
 #endif // MUTTERINPUTMONITOR_HH

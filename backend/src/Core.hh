@@ -53,6 +53,10 @@
 #include "Timer.hh"
 #include "Statistics.hh"
 
+#ifdef HAVE_DBUS
+#include "dbus/IDBus.hh"
+#endif
+
 using namespace workrave;
 
 // Forward declarion of external interface.
@@ -60,7 +64,6 @@ namespace workrave {
   class ISoundPlayer;
   class IApp;
   class INetwork;
-  class DBus;
 }
 
 class ActivityMonitor;
@@ -142,6 +145,7 @@ public:
   void report_external_activity(std::string who, bool act);
   void is_timer_running(BreakId id, bool &value);
   void get_timer_elapsed(BreakId id,int *value);
+  void get_timer_remaining(BreakId id,int *value);
   void get_timer_idle(BreakId id, int *value);
   void get_timer_overdue(BreakId id,int *value);
 
@@ -150,7 +154,7 @@ public:
   void skip_break(BreakId break_id);
 
 #ifdef HAVE_DBUS
-  DBus *get_dbus()
+  workrave::dbus::IDBus::Ptr get_dbus()
   {
     return dbus;
   }
@@ -165,10 +169,10 @@ private:
     };
 #endif
 
-  void init(int argc, char **argv, IApp *application, const std::string &display_name);
+  void init(int argc, char **argv, IApp *application, const char *display_name);
   void init_breaks();
   void init_configurator();
-  void init_monitor(const std::string &display_name);
+  void init_monitor(const char *display_name);
   void init_distribution_manager();
   void init_bus();
   void init_statistics();
@@ -301,7 +305,7 @@ private:
 
 #ifdef HAVE_DBUS
   //! DBUS bridge
-  DBus *dbus;
+  workrave::dbus::IDBus::Ptr dbus;
 #endif
 
 #ifdef HAVE_DISTRIBUTION

@@ -9,18 +9,6 @@ SUBDIRS = 		win32
 
 noinst_LTLIBRARIES = 	libworkrave-common.la
 
-dbussources =
-if HAVE_DBUS
-if HAVE_DBUS_GIO
-dbussources += 		DBus-gio.cc \
-			DBusBinding-gio.cc \
-			DBusProxy-gio.cc
-else
-dbussources += 		DBus-freedesktop.cc \
-			DBusBinding-freedesktop.cc
-endif
-endif
-
 localesources = 	Locale.cc
 
 libworkrave_common_la_SOURCES =  \
@@ -29,10 +17,8 @@ libworkrave_common_la_SOURCES =  \
 			Util.cc \
 			StringUtil.cc \
 			WRID.cc \
-			${dbussources} \
+      DBusProxy-gio.cc \
 			${localesources}
-
-##			glibnls.c \
 
 if PLATFORM_OS_WIN32
 ldadd_platform = 	win32/libworkrave-common-win32.la
@@ -43,7 +29,7 @@ libworkrave_common_la_LIBADD = ${ldadd_platform}
 AM_CPPFLAGS = 		-W -DWORKRAVE_PKGDATADIR="\"${pkgdatadir}\"" -DWORKRAVE_DATADIR="\"${datadir}\"" \
 			-D_XOPEN_SOURCE=600 \
 			@WR_COMMON_INCLUDES@ \
-			@GLIB_CFLAGS@ @DBUS_CFLAGS@ 
+			@GLIB_CFLAGS@
 
 EXTRA_DIST = 		$(wildcard $(srcdir)/*.hh) $(wildcard $(srcdir)/*.h) $(wildcard $(srcdir)/*.icc) locale.inc
 

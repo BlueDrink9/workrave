@@ -49,8 +49,14 @@
 #endif
 
 #ifdef HAVE_GTK3
+#include "GtkUtil.hh"
+
+#if GTK_CHECK_VERSION(3,24,0)
+GdkSeat *WindowHints::seat = NULL;
+#else
 GdkDevice *WindowHints::keyboard = NULL;
 GdkDevice *WindowHints::pointer = NULL;
+#endif
 #endif
 
 void
@@ -110,54 +116,84 @@ WindowHints::grab(int num_windows, GdkWindow **windows)
 
       delete [] unblocked_windows;
     }
-#elif defined(HAVE_GTK3)
-  if (num_windows > 0)
+#elif defined(HAVE_GTK3) && GTK_CHECK_VERSION(3,24,0)
+  // gdk_device_grab is deprecated since 3.20.
+  // However, an issue that was solved in gtk 3.24 causes windows to be hidden
+  // when a grab fails: https://github.com/GNOME/gtk/commit/2c8b95a518bea2192145efe11219f2e36091b37a
+  if (! GtkUtil::running_on_wayland())
     {
-      GdkDevice *device = gtk_get_current_event_device();
-      if (device == NULL)
+      if (num_windows > 0)
         {
           GdkDisplay *display = gdk_window_get_display(windows[0]);
-          GdkDeviceManager *device_manager = gdk_display_get_device_manager(display);
-          device = gdk_device_manager_get_client_pointer(device_manager);
+          seat = gdk_display_get_default_seat(display);
+
+          GdkGrabStatus grabStatus = gdk_seat_grab (seat,
+                                                    windows[0],
+                                                    GDK_SEAT_CAPABILITY_ALL,
+                                                    TRUE,
+                                                    NULL,
+                                                    NULL,
+                                                    NULL,
+                                                    NULL);
+         if (grabStatus == GDK_GRAB_SUCCESS)
+            {
+                  // A bit of a hack, but GTK does not need any data in the handle.
+                  // So, let's not waste memory and simply return a bogus non-NULL ptr.
+                  handle = (WindowHints::Grab *) 0xdeadf00d;
+            }
         }
-      
-      if (device != NULL)
+    }
+#elif defined(HAVE_GTK3)
+  if (! GtkUtil::running_on_wayland())
+    {
+      if (num_windows > 0)
         {
-          if (gdk_device_get_source(device) == GDK_SOURCE_KEYBOARD)
+          GdkDevice *device = gtk_get_current_event_device();
+          if (device == NULL)
             {
-              keyboard = device;
-              pointer = gdk_device_get_associated_device(device);
+              GdkDisplay *display = gdk_window_get_display(windows[0]);
+              GdkDeviceManager *device_manager = gdk_display_get_device_manager(display);
+              device = gdk_device_manager_get_client_pointer(device_manager);
             }
-          else
+
+          if (device != NULL)
             {
-              pointer = device;
-              keyboard = gdk_device_get_associated_device(device);
+              if (gdk_device_get_source(device) == GDK_SOURCE_KEYBOARD)
+                {
+                  keyboard = device;
+                  pointer = gdk_device_get_associated_device(device);
+                }
+              else
+                {
+                  pointer = device;
+                  keyboard = gdk_device_get_associated_device(device);
+                }
             }
-        }
 
-      GdkGrabStatus keybGrabStatus;
-      keybGrabStatus = gdk_device_grab(keyboard, windows[0],
-                                       GDK_OWNERSHIP_NONE, TRUE,
-                                       (GdkEventMask) (GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK),
-                                       NULL, GDK_CURRENT_TIME);
+          GdkGrabStatus keybGrabStatus;
+          keybGrabStatus = gdk_device_grab(keyboard, windows[0],
+                                           GDK_OWNERSHIP_NONE, TRUE,
+                                           (GdkEventMask) (GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK),
+                                           NULL, GDK_CURRENT_TIME);
 
-      if (keybGrabStatus == GDK_GRAB_SUCCESS)
-        {
-          GdkGrabStatus pointerGrabStatus;
-          pointerGrabStatus = gdk_device_grab(pointer, windows[0],
-                                              GDK_OWNERSHIP_NONE, TRUE,
-                                              (GdkEventMask) (GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK),
-                                              NULL, GDK_CURRENT_TIME);
-
-          if (pointerGrabStatus != GDK_GRAB_SUCCESS)
+          if (keybGrabStatus == GDK_GRAB_SUCCESS)
             {
-              gdk_device_ungrab(keyboard, GDK_CURRENT_TIME);
-            }
-          else
-            {
-              // A bit of a hack, but GTK does not need any data in the handle.
-              // So, let's not waste memory and simply return a bogus non-NULL ptr.
-              handle = (WindowHints::Grab *) 0xdeadf00d;
+              GdkGrabStatus pointerGrabStatus;
+              pointerGrabStatus = gdk_device_grab(pointer, windows[0],
+                                                  GDK_OWNERSHIP_NONE, TRUE,
+                                                  (GdkEventMask) (GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK),
+                                                  NULL, GDK_CURRENT_TIME);
+
+              if (pointerGrabStatus != GDK_GRAB_SUCCESS)
+                {
+                  gdk_device_ungrab(keyboard, GDK_CURRENT_TIME);
+                }
+              else
+                {
+                  // A bit of a hack, but GTK does not need any data in the handle.
+                  // So, let's not waste memory and simply return a bogus non-NULL ptr.
+                  handle = (WindowHints::Grab *) 0xdeadf00d;
+                }
             }
         }
     }
@@ -211,16 +247,24 @@ WindowHints::ungrab(WindowHints::Grab *handle)
 
 #if defined(PLATFORM_OS_WIN32)
   win32_block_input(FALSE);
-#elif defined(HAVE_GTK3)
-  if (keyboard != NULL)
+#elif defined(HAVE_GTK3) && GTK_CHECK_VERSION(3,24,0)
+  if (! GtkUtil::running_on_wayland())
     {
-      gdk_device_ungrab(keyboard, GDK_CURRENT_TIME);
-      keyboard = NULL;
+      gdk_seat_ungrab(seat);
     }
-  if (pointer != NULL)
+#elif defined(HAVE_GTK3)
+  if (! GtkUtil::running_on_wayland())
     {
-      gdk_device_ungrab(pointer, GDK_CURRENT_TIME);
-      pointer = NULL;
+      if (keyboard != NULL)
+        {
+          gdk_device_ungrab(keyboard, GDK_CURRENT_TIME);
+          keyboard = NULL;
+        }
+      if (pointer != NULL)
+        {
+          gdk_device_ungrab(pointer, GDK_CURRENT_TIME);
+          pointer = NULL;
+        }
     }
 #else
   gdk_keyboard_ungrab(GDK_CURRENT_TIME);

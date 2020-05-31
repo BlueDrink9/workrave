@@ -1,9 +1,153 @@
-Workrave NEWS -- history of user-visible changes.  15 Sep 2016
-Copyright (C) 2001-2016 Rob Caelers, Raymond Penners, Ray Satiro
+Workrave NEWS -- history of user-visible changes. 24 May 2020
+Copyright (C) 2001-2020 Rob Caelers, Raymond Penners, Ray Satiro
 See the end for copying conditions.
 
 Please report Workrave bug reports. Visit our bug tracker located at:
-http://www.workrave.org
+https://github.com/rcaelers/workrave/issues
+
+* Workrave 1.10.45
+
+** Micro breaks without a postpone button could be postponed by starting a rest
+   break while the break prompt window was visible and then clicking postpone
+   in the rest break window. The postpone button is now disabled when the micro
+   break is overdue, and the maximum number of break prompts was reached.
+** Fix build issue with libayatana-indicator3.
+
+* Workrave 1.10.44
+
+** Update Italian translation (Albano Battistella)
+** Support libayatana-indicator3 (Kentaro Hayashi/Rob Caelers)
+** Fixed issue on Gnome where Workrave would not detect that the user is idle (#181)
+
+* Workrave 1.10.43
+
+** Fix issue where a break window could disappear after a few seconds.
+** Fix issie where the Gnome Shell applet would be reload on Ubuntu 18.04.
+** Update Traditional Chinese translation (Yuenfu Chiu)
+
+* Workrave 1.10.42
+
+** Fix Gnome Shell applet compatibility issue with Ubuntu 18.04.
+
+* Workrave 1.10.41
+
+** Fix incomplete Gnome Shell applet menu with latest version of Gnome Shell
+
+* Workrave 1.10.40
+
+** Fix creation for source tarball.
+
+* Workrave 1.10.39
+
+** When it is time to take a micro break, Workrave may start a rest break
+   instead. This happens when the rest break would start within 30 seconds of
+   the micro break. If the postpone or skip buttons are disabled on the micro
+   break, they will be temporarily disabled on the rest break window. A small
+   progress bar indicates how long the buttons are disabled. Previously,
+   Workrave would restart the micro break when pressing the skip or postpone
+   button.
+** Support applets on Gnome 3.35.1+ using libgnome-panel (Alberts Muktupāvels).
+** Added Indonesian translation (Andika Triwidada).
+** Fixed issue where Workrave was not properly terminated on reinstall.
+
+* Workrave 1.10.38
+
+** Show operation mode in Gnome applet.
+** Fixed focus issue on rest break window that caused muted (grey) text.
+
+* Workrave 1.10.37
+
+** Add Ubuntu 19.10 / 20.04 to Workrave PPA
+
+* Workrave 1.10.36
+
+** Update Irish translation (Seanán Ó Coistín)
+** new Portuguese translation (pmraps)
+** Non-blocking break windows are now centered on Wayland/mutter (#163)
+** Support display scaling
+
+* Workrave 1.10.34
+
+** Ubuntu Trusty and Xenial build fixes.
+
+* Workrave 1.10.33
+
+** Packaging fixes.
+
+* Workrave 1.10.32
+
+** Fixed a bug that caused high CPU load when the main window was
+   open for a long time.
+
+** [internal change] Python 2 is no longer required for building
+   Workrave. The Python2-only Cheetah dependency has been replaced
+   by Jinja 2 (python3-jinja2). Additionally, Boost >= 1.52 is now
+   required (libboost-dev).
+
+* Workrave 1.10.31
+
+** Add GetTimerRemaining dbus function.
+
+* Workrave 1.10.30
+
+** Prevent "Workrave wants to inhibit shortcuts" on Wayland
+** Fix timer bar text color under Wayland
+** Do not dim text in time bar when window is not focused.
+
+* Workrave 1.10.28 / 1.10.29
+
+** Fix PPA upload
+
+* Workrave 1.10.27
+
+** Fix menu in Cinnamon applet
+** Fix bouncing Cinnamon applet
+
+* Workrave 1.10.26
+
+** Fix Gnome Shell applet for Gnome Shell v3.30
+
+** Reduce padding in timer window
+
+* Workrave 1.10.25
+
+** Packaging fixes
+
+* Workrave 1.10.24
+
+** Fix AppStream metadata (Balló György)
+
+** Update Slovak translation (Jose Riha)
+
+* Workrave 1.10.23
+
+** Packaging fixes
+
+* Workrave 1.10.22
+
+** Fix size of Xfce applet
+
+* Workrave 1.10.21
+
+** Support MATE applet with Gtk+3
+
+** Support Xfce applet with Gtk+3
+
+* Workrave 1.10.20
+
+** Fix activity monitoring on non-Gnome desktop environments
+
+* Workrave 1.10.19
+
+** Fix crash because of missing setting
+
+** Fix Gnome Shell applet
+
+* Workrave 1.10.18
+
+** Support Gnome Shell 3.24/26
+
+** macOS compilation fixes (Tom Parker)
 
 * Workrave 1.10.17
 

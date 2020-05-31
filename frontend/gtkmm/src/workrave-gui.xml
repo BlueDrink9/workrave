@@ -1,18 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <unit name="DBusGUI">
-
-  <interface name="org.workrave.ControlInterface" csymbol="Menus">
     <import>
-      <include name="Menus.hh"/>
+        <include name="Menus.hh"/>
+        <include name="GenericDBusApplet.hh"/>
     </import>
 
     <enum name="operation_mode" csymbol="OperationMode">
-      <value name="normal"    csymbol="OPERATION_MODE_NORMAL" value="0"/>
-      <value name="suspended" csymbol="OPERATION_MODE_SUSPENDED"/>
-      <value name="quiet"     csymbol="OPERATION_MODE_QUIET"/>
+        <value name="normal"    csymbol="OPERATION_MODE_NORMAL" value="0"/>
+        <value name="suspended" csymbol="OPERATION_MODE_SUSPENDED"/>
+        <value name="quiet"     csymbol="OPERATION_MODE_QUIET"/>
     </enum>
 
+    <struct name="TimerData" csymbol="GenericDBusApplet::TimerData">
+        <field type="string" name="bar_text"/>
+        <field type="int" name="slot"/>
+        <field type="uint32" name="bar_secondary_color"/>
+        <field type="uint32" name="bar_secondary_val"/>
+        <field type="uint32" name="bar_secondary_max"/>
+        <field type="uint32" name="bar_primary_color"/>
+        <field type="uint32" name="bar_primary_val"/>
+        <field type="uint32" name="bar_primary_max"/>
+    </struct>
+
+    <struct name="MenuItem" csymbol="GenericDBusApplet::MenuItem">
+        <field type="string" name="text"/>
+        <field type="int32" name="command"/>
+        <field type="int32" name="flags"/>
+    </struct>
+
+    <sequence name="MenuItems"
+	            container="std::list"
+	            type="MenuItem"
+	            csymbol="GenericDBusApplet::MenuItems">
+    </sequence>
+
+  <interface name="org.workrave.ControlInterface" csymbol="Menus">
     <method name="OpenMain"              csymbol="on_menu_open_main_window"/>
     <method name="Preferences"           csymbol="on_menu_preferences"/>
     <method name="SetOperationMode"      csymbol="on_set_operation_mode">
@@ -36,33 +59,6 @@
   </interface>
 
   <interface name="org.workrave.AppletInterface" csymbol="GenericDBusApplet">
-    <import>
-      <include name="GenericDBusApplet.hh"/>
-    </import>
-
-    <struct name="TimerData" csymbol="GenericDBusApplet::TimerData">
-      <field type="string" name="bar_text"/>
-      <field type="int32" name="slot"/>
-      <field type="uint32" name="bar_secondary_color"/>
-      <field type="uint32" name="bar_secondary_val"/>
-      <field type="uint32" name="bar_secondary_max"/>
-      <field type="uint32" name="bar_primary_color"/>
-      <field type="uint32" name="bar_primary_val"/>
-      <field type="uint32" name="bar_primary_max"/>
-    </struct>
-
-    <struct name="MenuItem" csymbol="GenericDBusApplet::MenuItem">
-      <field type="string" name="text"/>
-      <field type="int32" name="command"/>
-      <field type="int32" name="flags"/>
-    </struct>
-
-    <sequence name="MenuItems"
-	      container="std::list"
-	      type="MenuItem"
-	      csymbol="GenericDBusApplet::MenuItems">
-    </sequence>
-    
     <method name="Embed" csymbol="applet_embed">
       <arg type="bool" name="enabled" direction="in"/>
       <arg type="string" name="sender" direction="in"/>
@@ -83,7 +79,7 @@
     <method name="GetTrayIconEnabled" csymbol="get_tray_icon_enabled">
       <arg type="bool" name="enabled" direction="out"/>
     </method>
-    
+
     <signal name="TimersUpdated">
       <arg type="TimerData" name="micro" hint="ref"/>
       <arg type="TimerData" name="rest" hint="ref"/>
@@ -97,49 +93,5 @@
     <signal name="TrayIconUpdated">
       <arg type="bool" name="enabled"/>
     </signal>
-    
-  </interface>
-    
-  <interface name="org.workrave.GnomeAppletSupportInterface" csymbol="GnomeAppletWindow"
-             condition="defined(HAVE_PANELAPPLET2)">
-    <import>
-      <include name="gdk/gdk.h"/>
-      <include name="GnomeAppletWindow.hh"/>
-      <include name="Orientation.hh"/>
-    </import>
-
-    <struct name="Color" csymbol="GdkColor">
-      <field type="uint32" name="pixel"/>
-      <field type="uint32" name="red"/>
-      <field type="uint32" name="green"/>
-      <field type="uint32" name="blue"/>
-    </struct>
-
-    <enum name="Orientation" csymbol="Orientation">
-      <value name="up"    csymbol="ORIENTATION_UP"/>
-      <value name="right" csymbol="ORIENTATION_RIGHT"/>
-      <value name="down"  csymbol="ORIENTATION_DOWN"/>
-      <value name="left"  csymbol="ORIENTATION_LEFT"/>
-    </enum>
-
-    <method name="SetOrientation" csymbol="set_applet_orientation">
-      <arg type="Orientation" name="orientation" direction="in"/>
-    </method>
-      
-    <method name="SetSize" csymbol="set_applet_size">
-      <arg type="uint32" name="size" direction="in"/>
-    </method>
-      
-    <method name="SetBackground" csymbol="set_applet_background">
-      <arg type="uint32" name="type" direction="in"/>
-      <arg type="Color" name="color" direction="in"/>
-      <arg type="uint32" name="xid" direction="in"/>
-    </method>
-
-    <method name="ButtonClicked" csymbol="button_clicked">
-      <arg type="uint32" name="button" direction="in"/>
-    </method>
-
-    <method name="EmbedRequest" csymbol="fire_gnome_applet"/>
   </interface>
 </unit>

@@ -1,6 +1,6 @@
 // MainWindow.cc --- Main info Window
 //
-// Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013 Rob Caelers & Raymond Penners
+// Copyright (C) 2001 - 2013 Rob Caelers & Raymond Penners
 // All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
@@ -253,7 +253,7 @@ MainWindow::init()
   list<Glib::RefPtr<Gdk::Pixbuf> > icons;
 
   const char *icon_files[] = {
-    "scalable/apps/workrave.svg",
+                               "scalable/apps/workrave.svg",
                                "16x16/apps/workrave.png",
                                "24x24/apps/workrave.png",
                                "32x32/apps/workrave.png",
@@ -290,9 +290,18 @@ MainWindow::init()
   timer_box_control = new TimerBoxControl("main_window", *timer_box_view);
   timer_box_view->set_geometry(ORIENTATION_LEFT, -1);
   timer_box_control->update();
-  add(*timer_box_view);
 
-  set_events(get_events() | Gdk::BUTTON_PRESS_MASK | Gdk::SUBSTRUCTURE_MASK);
+  Gtk::EventBox *eventbox = new Gtk::EventBox;
+  eventbox->set_visible_window(false);
+  eventbox->set_events(eventbox->get_events() | Gdk::BUTTON_PRESS_MASK);
+#ifndef PLATFORM_OS_OSX
+  // No popup menu on OS X
+  eventbox->signal_button_press_event().connect(sigc::mem_fun(*this,
+                                                              &MainWindow::on_timer_view_button_press_event));
+
+#endif
+  eventbox->add(*timer_box_view);
+  add(*eventbox);
 
   // Necessary for popup menu
   realize_if_needed();
@@ -456,17 +465,13 @@ MainWindow::on_delete_event(GdkEventAny *)
   return true;
 }
 
-//! Users pressed some mouse button in the main window.
 bool
-MainWindow::on_button_press_event(GdkEventButton *event)
+MainWindow::on_timer_view_button_press_event(GdkEventButton *event)
 {
-  TRACE_ENTER("MainWindow::on_button_press_event");
+  TRACE_ENTER("MainWindow::on_timer_view_button_press_event");
   bool ret = false;
 
   (void) event;
-
-#ifndef PLATFORM_OS_OSX
-  // No popup menu on OS X
 
   if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3))
     {
@@ -475,7 +480,6 @@ MainWindow::on_button_press_event(GdkEventButton *event)
       menus->popup(Menus::MENU_MAINWINDOW, event->button, event->time);
       ret = true;
     }
-#endif
 
   TRACE_EXIT();
   return ret;
@@ -802,23 +806,19 @@ MainWindow::relocate_window(int width, int height)
       int num_heads = gui->get_number_of_heads();
       for (int i = 0; i < num_heads; i++)
         {
-          HeadInfo &head = gui->get_head(i);
-          if (head.valid)
-            {
 #ifdef HAVE_GTK3
-              GtkRequisition min_size;
-              GtkRequisition natural_size;
-              get_preferred_size(min_size, natural_size);
+          GtkRequisition min_size;
+          GtkRequisition natural_size;
+          get_preferred_size(min_size, natural_size);
 #else
-              GtkRequisition min_size;
-              on_size_request(&min_size);
+          GtkRequisition min_size;
+          on_size_request(&min_size);
 #endif
 
-              GUI::get_instance()->bound_head(x, y, min_size.width, min_size.height, i);
+          GUI::get_instance()->bound_head(x, y, min_size.width, min_size.height, i);
 
-              gui->map_from_head(x, y, i);
-              break;
-            }
+          gui->map_from_head(x, y, i);
+          break;
         }
 
       if (x < 0)

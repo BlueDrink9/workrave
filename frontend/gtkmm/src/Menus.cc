@@ -63,11 +63,6 @@
 #include "MainGtkMenu.hh"
 #include "AppletControl.hh"
 
-#ifdef HAVE_PANELAPPLET2
-#include "GnomeAppletMenu.hh"
-#include "GnomeAppletWindow.hh"
-#endif
-
 #ifdef HAVE_INDICATOR
 #include "IndicatorAppletMenu.hh"
 #endif
@@ -147,13 +142,7 @@ Menus::init(AppletControl *applet_control)
   menus[MENU_APPLET_W32] = new W32AppletMenu(w32_applet_window);
 #endif
 
-#if defined(HAVE_PANELAPPLET2)
-  applet_window = applet_control->get_applet_window(AppletControl::APPLET_GNOME);
-  GnomeAppletWindow *gnome_applet_window = dynamic_cast<GnomeAppletWindow*>(applet_window);
-  menus[MENU_APPLET_GNOME] = new GnomeAppletMenu(gnome_applet_window);
-#endif
-
-#if defined(HAVE_DBUS_GIO)
+#if defined(HAVE_DBUS)
   applet_window = applet_control->get_applet_window(AppletControl::APPLET_GENERIC_DBUS);
   GenericDBusApplet *indicator_applet = dynamic_cast<GenericDBusApplet*>(applet_window);
   menus[MENU_APPLET_GENERICDBUS] = indicator_applet;

@@ -30,6 +30,7 @@
 #endif
 #include <iostream>
 #include <gtkmm.h>
+
 #include <glibmm.h>
 #include <gtk/gtk.h>
 
@@ -104,8 +105,8 @@
 #if defined(interface)
 #undef interface
 #endif
-#include "DBus.hh"
-#include "DBusException.hh"
+#include "dbus/IDBus.hh"
+#include "dbus/DBusException.hh"
 #endif
 
 #ifdef HAVE_GTK_MAC_INTEGRATION
@@ -198,35 +199,50 @@ GUI::main()
 {
   TRACE_ENTER("GUI::main");
 
-  Glib::OptionContext option_ctx;
 
 #ifdef PLATFORM_OS_UNIX
   XInitThreads();
 #endif
-  
-  if (!Glib::thread_supported())
-    Glib::thread_init();
 
+  if (!Glib::thread_supported())
+    {
+      Glib::thread_init();
+    }
+
+#ifdef HAVE_GTK3
+  app = Gtk::Application::create(argc, argv, "org.workrave.WorkraveApplication");
+  app->hold();
+#else
+#if defined(PLATFORM_OS_WIN32)
+  Glib::OptionContext option_ctx;
   Glib::OptionGroup *option_group = new Glib::OptionGroup(egg_sm_client_get_option_group());
   option_ctx.add_group(*option_group);
+#endif
 
   Gtk::Main *kit = NULL;
   try
     {
+#if defined(PLATFORM_OS_WIN32)
       kit = new Gtk::Main(argc, argv, option_ctx);
+#else
+      kit = new Gtk::Main(argc, argv);
+#endif
     }
   catch (const Glib::OptionError &e)
     {
       std::cout << "Failed to initialize: " << e.what() << std::endl;
       exit(1);
     }
-  
+#endif
+
   init_core();
   init_nls();
   init_debug();
   init_sound_player();
   init_multihead();
+#ifdef HAVE_DBUS
   init_dbus();
+#endif
   init_platform();
   init_session();
   init_gui();
@@ -234,25 +250,33 @@ GUI::main()
 
   on_timer();
 
-  TRACE_MSG("Initialized. Entering event loop.");
-
-  // Enter the event loop
+#ifdef HAVE_GTK3
+  app->run();
+#else
   Gtk::Main::run();
+#endif
+  TRACE_MSG("loop ended");
+
   System::clear();
+#if defined(PLATFORM_OS_WIN32)
   cleanup_session();
+#endif
+
   for (list<sigc::connection>::iterator i = event_connections.begin(); i != event_connections.end(); i++)
     {
       i->disconnect();
     }
-    
+
   delete main_window;
   main_window = NULL;
 
   delete applet_control;
   applet_control = NULL;
 
+#if !defined(HAVE_GTK3)
   delete kit;
-  
+#endif
+
   TRACE_EXIT();
 }
 
@@ -272,7 +296,12 @@ GUI::terminate()
 
   collect_garbage();
 
+#ifdef HAVE_GTK3
+  app->release();
+#else
   Gtk::Main::quit();
+#endif
+
   TRACE_EXIT();
 }
 
@@ -374,6 +403,7 @@ GUI::init_platform()
 }
 
 
+#if defined(PLATFORM_OS_WIN32)
 void
 GUI::session_quit_cb(EggSMClient *client, GUI *gui)
 {
@@ -400,31 +430,6 @@ GUI::session_save_state_cb(EggSMClient *client, GKeyFile *key_file, GUI *gui)
 }
 
 void
-GUI::init_session()
-{
-  TRACE_ENTER("GUI::init_session");
-  EggSMClient *client = NULL;
-  client = egg_sm_client_get();
-  if (client)
-    {
-      g_signal_connect(client,
-                       "quit",
-                       G_CALLBACK(session_quit_cb),
-                       this);
-      g_signal_connect(client,
-                       "save-state",
-                       G_CALLBACK(session_save_state_cb),
-                       this);
-    }
-
-  session = new Session();
-  session->init();
-
-  TRACE_EXIT();
-}
-
-
-void
 GUI::cleanup_session()
 {
   EggSMClient *client = NULL;
@@ -440,8 +445,34 @@ GUI::cleanup_session()
                                            this);
     }
 }
+#endif
 
+void
+GUI::init_session()
+{
+  TRACE_ENTER("GUI::init_session");
 
+#if defined(PLATFORM_OS_WIN32)
+  EggSMClient *client = NULL;
+  client = egg_sm_client_get();
+  if (client)
+    {
+      g_signal_connect(client,
+                       "quit",
+                       G_CALLBACK(session_quit_cb),
+                       this);
+      g_signal_connect(client,
+                       "save-state",
+                       G_CALLBACK(session_save_state_cb),
+                       this);
+    }
+#endif
+
+  session = new Session();
+  session->init();
+
+  TRACE_EXIT();
+}
 
 //! Initializes messages hooks.
 void
@@ -472,7 +503,7 @@ GUI::init_nls()
       g_setenv("LANGUAGE", language.c_str(), 1);
     }
 
-#  if !defined(HAVE_GNOME) && !defined(HAVE_GTK3)
+#  if !defined(HAVE_GTK3)
   gtk_set_locale();
 #  endif
   const char *locale_dir;
@@ -529,14 +560,10 @@ GUI::init_nls()
 void
 GUI::init_core()
 {
-  string display_name;
+  const char *display_name = NULL;
 
 #if defined(PLATFORM_OS_UNIX)
-  const char *display = gdk_display_get_name(gdk_display_get_default());
-  if (display != NULL)
-    {
-      display_name = display;
-    }
+  display_name = gdk_display_get_name(gdk_display_get_default());
 #endif
 
   core = CoreFactory::get_core();
@@ -553,18 +580,6 @@ GUI::init_multihead()
   TRACE_ENTER("GUI::init_multihead");
 
   init_gtk_multihead();
-  if (num_heads == -1)
-    {
-      init_multihead_mem(1);
-
-      heads[0].valid = false;
-      heads[0].count = 0;
-      heads[0].geometry.set_width(gdk_screen_width());
-      heads[0].geometry.set_height(gdk_screen_height());
-      heads[0].geometry.set_x(0);
-      heads[0].geometry.set_y(0);
-    }
-
   init_multihead_desktop();
   TRACE_EXIT();
 }
@@ -642,23 +657,12 @@ void
 GUI::init_multihead_desktop()
 {
   TRACE_ENTER("GUI::init_multihead_desktop");
-  TRACE_MSG("gdk width x height " << gdk_screen_width() << " " << gdk_screen_height());
 
   int width = 0;
   int height = 0;
 
-  // Use head info to determine screen size. I hope this results
-  // in the same size as the gdk_screen_xxx....
   for (int i = 0; i < num_heads; i++)
     {
-      if (!heads[i].valid)
-        {
-          // Not all heads have valid geometry. Use gdk.
-          width = gdk_screen_width();
-          height = gdk_screen_height();
-          break;
-        }
-
       int w = heads[i].geometry.get_x() + heads[i].geometry.get_width();
       int h = heads[i].geometry.get_y() + heads[i].geometry.get_height();
 
@@ -684,7 +688,6 @@ GUI::init_multihead_desktop()
     }
 }
 
-
 void
 GUI::init_gtk_multihead()
 {
@@ -708,15 +711,6 @@ GUI::init_gtk_multihead()
             }
         }
 
-      for (int i = 0; i < num_screens; i++)
-        {
-          Glib::RefPtr<Gdk::Screen> screen = display->get_screen(i);
-          if (screen)
-            {
-              TRACE_MSG("num monitors on screen " << i << " = " << screen->get_n_monitors());
-            }
-        }
-
       init_multihead_mem(new_num_heads);
 
       int count = 0;
@@ -732,6 +726,10 @@ GUI::init_gtk_multihead()
                   Gdk::Rectangle rect;
                   screen->get_monitor_geometry(j, rect);
 
+#ifdef HAVE_GTK3
+                  gint scale = screen->get_monitor_scale_factor(j);
+                  rect = Gdk::Rectangle(rect.get_x() / scale, rect.get_y() / scale, rect.get_width() / scale, rect.get_height() / scale);
+#endif
                   bool overlap = false;
                   for (int k = 0; !overlap && k < count; k++)
                     {
@@ -747,9 +745,7 @@ GUI::init_gtk_multihead()
                     {
                       heads[count].screen = screen;
                       heads[count].monitor = j;
-                      heads[count].valid = true;
                       heads[count].count = count;
-
                       heads[count].geometry = rect;
                       count++;
                     }
@@ -804,11 +800,11 @@ GUI::init_gui()
   #endif
 
   process_visibility();
-  
-#ifdef HAVE_DBUS
-  DBus *dbus = CoreFactory::get_dbus();
 
-  if (dbus != NULL && dbus->is_available())
+#ifdef HAVE_DBUS
+  workrave::dbus::IDBus::Ptr dbus = CoreFactory::get_dbus();
+
+  if (dbus->is_available())
     {
       dbus->connect("/org/workrave/Workrave/UI",
                     "org.workrave.ControlInterface",
@@ -836,23 +832,34 @@ GUI::init_gui()
 
   // Periodic timer.
   Glib::signal_timeout().connect(sigc::mem_fun(*this, &GUI::on_timer), 1000);
+
+#ifndef HAVE_GTK3
+  static const gchar *rc_string =
+    {
+     "style \"progressBarWidth\"\n"
+     "{\n"
+     "   GtkProgressBar::min-horizontal-bar-width = 10\n"
+     "   GtkProgressBar::min-horizontal-bar-height = 2\n"
+     "}\n"
+     "\n"
+     "widget \"*.locked-progress\" style \"progressBarWidth\"\n"
+     // "class \"GtkProgressBar\" style \"progressBarWidth\"\n"
+    };
+
+	gtk_rc_parse_string(rc_string);
+#endif
 }
 
 
+#ifdef HAVE_DBUS
 void
 GUI::init_dbus()
 {
-#if defined(HAVE_DBUS)
-  DBus *dbus = CoreFactory::get_dbus();
+  workrave::dbus::IDBus::Ptr dbus = CoreFactory::get_dbus();
 
-  if (dbus != NULL && dbus->is_available())
+  if (dbus->is_available())
     {
-#ifdef HAVE_DBUS_GIO
       if (dbus->is_running("org.workrave.Workrave"))
-#else      
-      dbus->register_service("org.workrave.Workrave");
-      if (!dbus->is_owner())
-#endif
         {
           Gtk::MessageDialog dialog(_("Workrave failed to start"),
                                     false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
@@ -865,18 +872,15 @@ GUI::init_dbus()
       try
         {
           dbus->register_object_path("/org/workrave/Workrave/UI");
-#ifdef HAVE_DBUS_GIO
           dbus->register_service("org.workrave.Workrave", this);
-#endif
-          
-          extern void init_DBusGUI(DBus *dbus);
+
+          extern void init_DBusGUI(workrave::dbus::IDBus::Ptr dbus);
           init_DBusGUI(dbus);
         }
-      catch (DBusException &)
+      catch (workrave::dbus::DBusException &)
         {
         }
     }
-#endif
 }
 
 void
@@ -888,6 +892,7 @@ GUI::bus_name_presence(const std::string &name, bool present)
       exit(1);
     }
 }
+#endif
 
 void
 GUI::init_startup_warnings()
@@ -936,7 +941,7 @@ GUI::init_sound_player()
       sound_player = new SoundPlayer(); /* LEAK */
       sound_player->init();
     }
-  catch (Exception)
+  catch (Exception &)
     {
       TRACE_MSG("No sound");
     }
@@ -1037,6 +1042,7 @@ GUI::set_break_response(IBreakResponse *rep)
 void
 GUI::create_prelude_window(BreakId break_id)
 {
+  TRACE_ENTER_MSG("GUI::create_prelude_window", break_id);
   hide_break_window();
   init_multihead();
   collect_garbage();
@@ -1048,13 +1054,14 @@ GUI::create_prelude_window(BreakId break_id)
     }
 
   active_prelude_count = num_heads;
+  TRACE_EXIT();
 }
 
 
 void
 GUI::create_break_window(BreakId break_id, BreakHint break_hint)
 {
-  TRACE_ENTER_MSG("GUI::start_break_window", num_heads);
+  TRACE_ENTER_MSG("GUI::create_break_window", break_id << " " << break_hint);
   hide_break_window();
   init_multihead();
   collect_garbage();
@@ -1074,7 +1081,7 @@ GUI::create_break_window(BreakId break_id, BreakHint break_hint)
         }
     }
   else
-    { 
+    {
       if (ignorable)
         {
           break_flags |= BreakWindow::BREAK_FLAGS_POSTPONABLE;

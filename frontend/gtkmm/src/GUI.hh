@@ -27,7 +27,10 @@
 #include "OSXHelpers.hh"
 #endif
 #include <glibmm.h>
+
+#if defined(PLATFORM_OS_WIN32)
 #include "eggsmclient.h"
+#endif
 
 #include "HeadInfo.hh"
 #include "ICoreEventListener.hh"
@@ -35,7 +38,10 @@
 #include "IApp.hh"
 #include "BreakWindow.hh"
 #include "WindowHints.hh"
-#include "IDBusWatch.hh"
+
+#ifdef HAVE_DBUS
+#include "dbus/IDBusWatch.hh"
+#endif
 
 namespace workrave {
   class IBreakResponse;
@@ -73,7 +79,7 @@ public:
 
   virtual void open_main_window() = 0;
   virtual void restbreak_now() = 0;
-  
+
   virtual void interrupt_grab() = 0;
 
   virtual int get_number_of_heads() const = 0;
@@ -89,7 +95,9 @@ class GUI :
   public IApp,
   public ICoreEventListener,
   public IConfiguratorListener,
-  public IDBusWatch,
+#ifdef HAVE_DBUS
+  public workrave::dbus::IDBusWatch,
+#endif
   public sigc::trackable
 {
 public:
@@ -122,8 +130,10 @@ public:
   void core_event_operation_mode_changed(const OperationMode m);
   void core_event_usage_mode_changed(const UsageMode m);
 
+#ifdef HAVE_DBUS
   virtual void bus_name_presence(const std::string &name, bool present);
-  
+#endif
+
   // Internal public methods
   void restbreak_now();
   void open_main_window();
@@ -151,16 +161,19 @@ private:
   void init_multihead_mem(int new_num_heads);
   void init_multihead_desktop();
   void init_gui();
+#ifdef HAVE_DBUS
   void init_dbus();
+#endif
   void init_session();
   void init_startup_warnings();
 
   void init_gtk_multihead();
 
+#if defined(PLATFORM_OS_WIN32)
   static void session_quit_cb(EggSMClient *client, GUI *gui);
   static void session_save_state_cb(EggSMClient *client, GKeyFile *key_file, GUI *gui);
   void cleanup_session();
-
+#endif
   void collect_garbage();
   IBreakWindow *create_break_window(HeadInfo &head, BreakId break_id, BreakWindow::BreakFlags break_flags);
   void config_changed_notify(const std::string &key);
@@ -189,6 +202,11 @@ private:
 private:
   //! The one and only instance
   static GUI *instance;
+
+#ifdef HAVE_GTK3
+  // !
+  Glib::RefPtr<Gtk::Application> app;
+#endif
 
   //! The Core controller
   ICore *core;

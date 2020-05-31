@@ -22,7 +22,7 @@
 #endif
 
 #ifdef HAVE_DBUS
-#include "DBus.hh"
+#include "dbus/IDBus.hh"
 #endif
 
 #ifdef HAVE_TESTS

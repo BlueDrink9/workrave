@@ -19,20 +19,11 @@ bin_PROGRAMS = 		workrave
 
 endif
 
-eggcflags = 
-
-DEFS = 			@DEFS@ -DGNOMELOCALEDIR=\""$(datadir)/locale"\" \
+DEFS = @DEFS@ -DGNOMELOCALEDIR=\""$(datadir)/locale"\" \
 			-I$(top_srcdir)/intl
 
 extrasources =
 extranodistsources = 
-
-# Additional Gnome applet sources
-sourcesgnome2 =		GnomeAppletWindow.cc GnomeAppletMenu.cc  Plug.cc 
-
-if !HAVE_DBUS_GIO
-sourcesgnome2 += DBusGnomeApplet.cc
-endif
 
 # Additional Indicator applet sources
 sourcesindicator = 	IndicatorAppletMenu.cc
@@ -68,25 +59,7 @@ sourcesexercises = 	../../plugin/exercises/gtkmm/src/ExercisesDialog.cc \
 STATISTICS_HOME = 	$(top_srcdir)/frontend/plugin/statistics
 sourcesstatistics =	../../plugin/statistics/gtkmm/src/StatisticsDialog.cc
 
-if HAVE_PYTHON_CHEETAH
-GNOME_APPLET_HOME =	$(top_srcdir)/frontend/applets/gnome2/src
-
-DBusGnomeApplet.cc:	$(GNOME_APPLET_HOME)/gnome-applet.xml \
-			$(top_srcdir)/common/bin/dbusgen.py \
-		    	$(top_srcdir)/common/bin/DBus-client-template-freedesktop.cc \
-		    	$(top_srcdir)/common/bin/DBus-client-template-freedesktop.hh
-			$(PYTHON) $(top_srcdir)/common/bin/dbusgen.py --language=C++ -c $(GNOME_APPLET_HOME)/gnome-applet.xml DBUSGnomeApplet
-
-endif
-
-DBusGnomeApplet.hh:	DBusGnomeApplet.cc
-GnomeAppletWindow.cc:   DBusGnomeApplet.hh
-
 if HAVE_APP_GTKMM
-
-if HAVE_PANELAPPLET2
-extrasources +=		$(sourcesgnome2)
-endif
 
 if HAVE_INDICATOR
 extrasources += 	$(sourcesindicator)
@@ -94,19 +67,17 @@ indicatorflags = 	-I$(top_srcdir)/frontend/applets/indicator/include
 endif
 
 if PLATFORM_OS_UNIX
-extrasources +=		$(sourcesx) eggdesktopfile.c eggsmclient-xsmp.c
-eggcflags += 		-DEGG_SM_CLIENT_BACKEND_XSMP
-
+extrasources +=		$(sourcesx)
 includesx = 		-I$(top_srcdir)/frontend/gtkmm/src/unix/
 ldflags = 	        -L$(top_builddir)/frontend/gtkmm/src/unix/
 endif
 
 if PLATFORM_OS_WIN32
-extrasources +=		$(sourceswin32) eggsmclient-win32.c
+extrasources +=		eggsmclient-win32.c eggsmclient.c
 includeswin32 = 	-I$(top_srcdir)/common/win32/harpoon/include \
-			-I$(top_srcdir)/frontend/gtkmm/src/win32/ \
-			-I$(top_srcdir)/frontend/applets/win32/include \
-			-I$(top_srcdir)/backend/src/win32
+					-I$(top_srcdir)/frontend/gtkmm/src/win32/ \
+					-I$(top_srcdir)/frontend/applets/win32/include \
+					-I$(top_srcdir)/backend/src/win32
 ldflags = 		-L$(top_builddir)/frontend/gtkmm/src/win32/
 win32cflags		= -D_WIN32_IE=0x0600 -D_WIN32_WINNT=0x0600
 endif
@@ -127,6 +98,7 @@ WINDRES ?= 		"windres"
 .rc.o:
 	${WINDRES} -o $@ $<
 
+extrasources +=		$(sourceswin32)
 includesinput = 	-I$(top_srcdir)/common/win32/harpoon/include
 WIN32LIBS = 		$(top_builddir)/common/win32/harpoon/src/Release/harpoon.dll \
 			$(top_builddir)/frontend/gtkmm/src/win32/libworkrave-frontend-gtkmm-win32.la \
@@ -143,9 +115,7 @@ if PLATFORM_OS_OSX
 includesosx  = 		-I$(top_srcdir)/frontend/gtkmm/src/osx
 ldflags =	 	-L$(top_builddir)/frontend/gtkmm/src/osx
 OSXLIBS	=		$(top_builddir)/frontend/gtkmm/src/osx/libworkrave-frontend-gtkmm-osx.la
-extrasources +=	        eggsmclient-osx.c
 endif
-
 
 # DBus service file
 if HAVE_DBUS
@@ -162,37 +132,21 @@ CLEANFILES = org.workrave.Workrave.service
 
 dbussources = DBusGUI.cc DBusGUI.hh
 
-if HAVE_DBUS_GIO
+if HAVE_DBUS
 dbussources += 	GenericDBusApplet.cc
 endif
 
 BUILT_SOURCES = DBusGUI.cc DBusGUI.hh
 
-# broken: 
-# if PLATFORM_OS_UNIX
-# extrasources +=		eggsmclient-dbus.c
-# eggcflags += -DEGG_SM_CLIENT_BACKEND_DBUS
-# endif
+DBusGUI.cc: workrave-gui.xml \
+			$(top_srcdir)/libs/dbus/bin/dbusgen.py \
+		  $(top_srcdir)/libs/dbus/data/gio-cc.jinja
+			$(PYTHON) $(top_srcdir)/libs/dbus/bin/dbusgen.py $(srcdir)/workrave-gui.xml $(top_srcdir)/libs/dbus/data/gio-cc.jinja DBusGUI.cc
 
-if HAVE_PYTHON_CHEETAH
-
-if HAVE_DBUS_GIO
-DBusGUI.cc: 		workrave-gui.xml \
-			$(top_srcdir)/common/bin/dbusgen.py \
-			$(top_srcdir)/common/bin/DBus-template-gio.cc \
-			$(top_srcdir)/common/bin/DBus-template-gio.hh
-			$(PYTHON) $(top_srcdir)/common/bin/dbusgen.py --server --gio --language=C++ $(srcdir)/workrave-gui.xml DBusGUI
-else
-DBusGUI.cc: 		workrave-gui.xml \
-			$(top_srcdir)/common/bin/dbusgen.py \
-			$(top_srcdir)/common/bin/DBus-template-freedesktop.cc \
-			$(top_srcdir)/common/bin/DBus-template-freedesktop.hh
-			$(PYTHON) $(top_srcdir)/common/bin/dbusgen.py --server --language=C++ $(srcdir)/workrave-gui.xml DBusGUI
-endif
-
-DBusGUI.hh: 		DBusGUI.cc ; test -f $@
-
-endif # HAVE_PYTHON_CHEETAH
+DBusGUI.hh:  workrave-gui.xml \
+		  $(top_srcdir)/libs/dbus/bin/dbusgen.py \
+	    $(top_srcdir)/libs/dbus/data/gio-hh.jinja
+	    $(PYTHON) $(top_srcdir)/libs/dbus/bin/dbusgen.py $(srcdir)/workrave-gui.xml $(top_srcdir)/libs/dbus/data/gio-hh.jinja DBusGUI.hh
 
 else # HAVE_DBUS
 
@@ -221,7 +175,7 @@ desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 
 @INTLTOOL_DESKTOP_RULE@
 
-appdatadir = $(datarootdir)/appdata
+appdatadir = $(datarootdir)/metainfo
 dist_appdata_DATA = workrave.appdata.xml
 
 workrave_SOURCES = \
@@ -256,7 +210,6 @@ workrave_SOURCES = \
 			TimerBoxPreferencePage.cc \
 			TimerPreferencesPanel.cc \
 			WindowHints.cc \
-			eggsmclient.c \
 			main.cc \
 			$(extrasources) \
 			${dbussources}
@@ -271,9 +224,9 @@ workrave_CXXFLAGS = 	-DWORKRAVE_PKGDATADIR="\"${pkgdatadir}\"" -W \
 			@WR_COMMON_INCLUDES@ @WR_BACKEND_INCLUDES@ @WR_FRONTEND_COMMON_INCLUDES@ \
 			@X_CFLAGS@ @GTK_CFLAGS@ @GLIB_CFLAGS@ \
 			@GCONF_CFLAGS@ -D_XOPEN_SOURCE=600 @GNET_CFLAGS@ \
-			@DBUS_CFLAGS@ @DBUSGLIB_CFLAGS@  @IGE_CFLAGS@ \
+			@IGE_CFLAGS@ \
 			$(includeswin32) $(win32cflags) $(includesinput) $(includesosx) \
-			$(includesx) $(eggcflags) $(INDICATOR_CFLAGS) $(indicatorflags) \
+			$(includesx) $(INDICATOR_CFLAGS) $(indicatorflags) \
 			-I${DISTRIBUTION_HOME}/gtkmm/src \
 			-I${STATISTICS_HOME}/gtkmm/src \
 			-I${EXERCISES_HOME}/gtkmm/src \
@@ -287,8 +240,8 @@ endif
 workrave_CFLAGS	= 	-DWORKRAVE_PKGDATADIR="\"${pkgdatadir}\"" \
 			-I$(top_srcdir)/frontend/gtkmm/src/ @GLIB_CFLAGS@ \
 			@WR_COMMON_INCLUDES@ @WR_BACKEND_INCLUDES@ @WR_FRONTEND_COMMON_INCLUDES@ \
-			@X_CFLAGS@ @GTK_CFLAGS@ @DBUS_CFLAGS@ @DBUSGLIB_CFLAGS@ @X11SM_CFLAGS@\
-			-D_XOPEN_SOURCE=600  $(eggcflags) \
+			@X_CFLAGS@ @GTK_CFLAGS@ @X11SM_CFLAGS@\
+			-D_XOPEN_SOURCE=600 \
 			-I${DISTRIBUTION_HOME}/gtkmm/src \
 			-I${STATISTICS_HOME}/gtkmm/src \
 			-I${EXERCISES_HOME}/gtkmm/src \
@@ -305,7 +258,7 @@ workrave_LDFLAGS = 	@WR_LDFLAGS@ ${ldflags} ${WIN32LDFLAGS}
 
 workrave_LDADD =        @WR_LDADD@ @X_LIBS@ @X11SM_LIBS@ @GLIB_LIBS@ \
 			@GTK_LIBS@ @GNET_LIBS@ @X_LIBS@ @GCONF_LIBS@ @GDOME_LIBS@ \
-			@PULSE_LIBS@ @DBUS_LIBS@ @DBUSGLIB_LIBS@ @IGE_LIBS@ @GSTREAMER_LIBS@ \
+			@PULSE_LIBS@ @IGE_LIBS@ @GSTREAMER_LIBS@ \
 			${X11LIBS} ${WIN32LIBS} @GTK_LIBS@ ${OSXLIBS} ${WIN32CONSOLE} \
 			${DIRECTSOUNDLIBS} $(INDICATOR_LIBS)
 

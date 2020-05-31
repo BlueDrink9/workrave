@@ -101,14 +101,13 @@ errorHandler(Display *dpy, XErrorEvent *error)
 }
 #endif
 
-RecordInputMonitor::RecordInputMonitor(const string &display_name) :
+RecordInputMonitor::RecordInputMonitor(const char *display_name) :
+  x11_display_name(display_name),
   x11_display(NULL),
-  abort(false)
+  abort(false),
+  xrecord_context(0),
+  xrecord_datalink(NULL)
 {
-  xrecord_context = 0;
-  xrecord_datalink = NULL;
-
-  x11_display_name = display_name;
   monitor_thread = new Thread(this);
 }
 
@@ -174,7 +173,7 @@ void
 RecordInputMonitor::error_trap_enter()
 {
 #ifdef HAVE_APP_GTK
-  gdk_error_trap_push();
+  gdk_x11_display_error_trap_push(gdk_display_get_default());
 #else
   old_handler = XSetErrorHandler(&errorHandler);
 #endif
@@ -184,9 +183,8 @@ void
 RecordInputMonitor::error_trap_exit()
 {
 #ifdef HAVE_APP_GTK
-  gdk_flush ();
-  gint err = gdk_error_trap_pop();
-  (void) err;
+  gdk_display_flush(gdk_display_get_default());
+  gdk_x11_display_error_trap_pop_ignored(gdk_display_get_default());
 #else
   XSetErrorHandler(old_handler);
 #endif
@@ -352,12 +350,9 @@ RecordInputMonitor::init_xrecord()
   bool use_xrecord = false;
   int major, minor;
 
-  if ((x11_display = XOpenDisplay(x11_display_name.c_str())) == NULL)
-    {
-      return false;
-    }
-  
-  if (XRecordQueryVersion(x11_display, &major, &minor))
+  x11_display = XOpenDisplay(x11_display_name);
+
+  if (x11_display != NULL && XRecordQueryVersion(x11_display, &major, &minor))
     {
       xrecord_context = 0;
       xrecord_datalink = NULL;
@@ -373,9 +368,9 @@ RecordInputMonitor::init_xrecord()
         {
           memset(recordRange, 0, sizeof(XRecordRange));
 
-          int dummy = 0;
+          int opcode, error_base;
           Bool have_xi =  XQueryExtension(x11_display, "XInputExtension",
-                                          &dummy, &xi_event_base, &dummy);
+                                          &opcode, &xi_event_base, &error_base);
 
           if (have_xi && xi_event_base != 0)
             {
@@ -400,7 +395,7 @@ RecordInputMonitor::init_xrecord()
         {
           XSync(x11_display, True);
 
-          xrecord_datalink = XOpenDisplay(x11_display_name.c_str());
+          xrecord_datalink = XOpenDisplay(x11_display_name);
         }
 
       if (xrecord_datalink == NULL)
