@@ -66,17 +66,17 @@ OSXAppletWindow::OSXAppletWindow()
   while ([menu numberOfItems] > 0) {
     [menu removeItemAtIndex:0];
   }
-  OSXMenuActions* target = [OSXMenuActions alloc];
 
-  for (unsigned int i=0;i<sizeof(actions)/sizeof(const char *); i++) {
-    NSMenuItem *item;
-    item = [[NSMenuItem alloc] init];
-    [item setTitle:[[NSString alloc] initWithUTF8String:actions[i]]];
-    [item setTarget:target];
-    [item setAction:@selector(runAction:)];
-    [item setEnabled:YES];
-    [menu addItem:item];
-  }
+  // OSXMenuActions* target = [OSXMenuActions alloc];
+  // for (unsigned int i=0;i<sizeof(actions)/sizeof(const char *); i++) {
+  //   NSMenuItem *item;
+  //   item = [[NSMenuItem alloc] init];
+  //   [item setTitle:[[NSString alloc] initWithUTF8String:actions[i]]];
+  //   [item setTarget:target];
+  //   [item setAction:@selector(runAction:)];
+  //   [item setEnabled:YES];
+  //   [menu addItem:item];
+  // }
 
   OSXMenuActions* target = [[OSXMenuActions alloc] init:this];
 
