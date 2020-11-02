@@ -48,6 +48,7 @@
 #include "GUIConfig.hh"
 #include "Menus.hh"
 #include "GtkUtil.hh"
+#include "Util.hh"
 #include "TimerBoxControl.hh"
 
 using namespace std;

@@ -47,6 +47,7 @@
 #include "TimerBoxControl.hh"
 #include "GUI.hh"
 #include "GtkUtil.hh"
+#include "Util.hh"
 #include "Menus.hh"
 
 #ifdef PLATFORM_OS_WIN32
@@ -266,6 +267,7 @@ MainWindow::init()
   for (unsigned int i = 0; i < sizeof(icon_files) / sizeof(char *); i++)
     {
       string file = Util::complete_directory(icon_files[i], Util::SEARCH_PATH_IMAGES);
+      // string file = icon_files[i];
 
       try
         {
